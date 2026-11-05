@@ -3,6 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import type { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../common/decorators/public.decorator';
+import { RequestContext } from '../common/request-context';
 import { AuthService, AuthUser, JwtPayload } from './auth.service';
 
 type AuthedRequest = Request & { user?: AuthUser };
@@ -31,6 +32,7 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException('Session expired, please log in again');
     }
     req.user = await this.auth.validatePayload(payload);
+    RequestContext.setUser(req.user);
     return true;
   }
 }

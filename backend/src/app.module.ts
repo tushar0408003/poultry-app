@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { InjectConnection, MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import type { Connection } from 'mongoose';
+import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { Public } from './common/decorators/public.decorator';
 import { validateEnv } from './config/env.validation';
@@ -13,6 +14,7 @@ import { DatabaseModule } from './database/database.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ReportsModule } from './reports/reports.module';
 import { SalesModule } from './sales/sales.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Controller('health')
 class HealthController {
@@ -45,6 +47,8 @@ class HealthController {
     PaymentsModule,
     ReportsModule,
     DashboardModule,
+    SettingsModule,
+    AuditModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

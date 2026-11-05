@@ -1,7 +1,19 @@
-import { plainToInstance, Type } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsOptional, IsString, Max, Min, MinLength, validateSync } from 'class-validator';
+import { plainToInstance, Transform, Type } from 'class-transformer';
+import { IsBoolean, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min, MinLength, validateSync } from 'class-validator';
+
+const toBool = ({ value }: { value: unknown }) => {
+  if (typeof value !== 'string') return value;
+  const v = value.trim().toLowerCase();
+  if (['true', '1', 'yes'].includes(v)) return true;
+  if (['false', '0', 'no'].includes(v)) return false;
+  return value; // rejected by @IsBoolean
+};
 
 export class EnvironmentVariables {
+  @IsOptional()
+  @IsIn(['development', 'production', 'test'])
+  NODE_ENV: 'development' | 'production' | 'test' = 'development';
+
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -37,6 +49,22 @@ export class EnvironmentVariables {
   @IsOptional()
   @IsString()
   CORS_ORIGINS: string = '*';
+
+  /** Refuse to start unless MongoDB supports transactions (replica set). Defaults to on in production. */
+  @IsOptional()
+  @Transform(toBool)
+  @IsBoolean({ message: 'REQUIRE_TRANSACTIONS must be true or false' })
+  REQUIRE_TRANSACTIONS?: boolean;
+}
+
+export function isProduction(config: { get(key: string): unknown }): boolean {
+  return config.get('NODE_ENV') === 'production';
+}
+
+/** Boolean env flag with an environment-dependent default. */
+export function flag(config: { get(key: string): unknown }, key: string, fallback: boolean): boolean {
+  const value = config.get(key);
+  return typeof value === 'boolean' ? value : fallback;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

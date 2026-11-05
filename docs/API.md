@@ -101,5 +101,17 @@ Response (also returned by GET/PATCH `/sales/:id`):
 ```
 `cashReceived` / `onlineReceived` are payments **dated that day**, including payments for older sales.
 
+## Settings
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/settings` | `{ businessName, defaultPurchaseRate, defaultSaleRate, updatedAt }` (defaults on first use) |
+| PATCH | `/settings` | Any of `businessName`, `defaultPurchaseRate`, `defaultSaleRate` (₹, 0 = none). Default rates only pre-fill forms |
+
+## Audit
+`GET /audit?entity=&entityId=&page=&limit=`: change history, newest first.
+`entity`: customer, supplier, purchase, sale, payment, expense, stock, settings.
+Each item: `{ id, entity, entityId, action: CREATE|UPDATE|DELETE, before, after, changedFields, username, at }`
+(snapshots are in stored units: paise / grams).
+
 ## Health
 `GET /health` → `{ "status": "ok", "database": "connected" }` (no auth)

@@ -1,6 +1,8 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectConnection } from '@nestjs/mongoose';
 import type { ClientSession, Connection } from 'mongoose';
+import { flag, isProduction } from '../config/env.validation';
 
 /**
  * Runs multi-document writes atomically.
@@ -15,7 +17,10 @@ export class TransactionService implements OnApplicationBootstrap {
   private readonly logger = new Logger(TransactionService.name);
   private supported = false;
 
-  constructor(@InjectConnection() private readonly connection: Connection) {}
+  constructor(
+    @InjectConnection() private readonly connection: Connection,
+    private readonly config: ConfigService,
+  ) {}
 
   async onApplicationBootstrap(): Promise<void> {
     const db = this.connection.db;
@@ -24,6 +29,11 @@ export class TransactionService implements OnApplicationBootstrap {
     this.supported = Boolean(hello.setName) || hello.msg === 'isdbgrid';
     if (this.supported) {
       this.logger.log(`MongoDB transactions enabled (replica set "${hello.setName ?? 'mongos'}")`);
+    } else if (flag(this.config, 'REQUIRE_TRANSACTIONS', isProduction(this.config))) {
+      throw new Error(
+        'MongoDB transactions are required (REQUIRE_TRANSACTIONS) but the server is standalone. ' +
+          'Run MongoDB as a replica set (see README) or set REQUIRE_TRANSACTIONS=false.',
+      );
     } else {
       this.logger.warn(
         'MongoDB is running standalone: transactions are DISABLED. ' +
