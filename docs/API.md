@@ -34,11 +34,11 @@ Every endpoint except `POST /auth/login` and `GET /health` needs `Authorization:
 ## Sales
 **POST `/sales`**
 ```json
-{ "customerId": "…", "saleDate": "2026-11-03", "weight": 50, "ratePerKg": 200,
+{ "customerId": "…", "saleDate": "2026-11-03", "weight": 50, "totalAmount": 10000,
   "cashReceived": 2000, "onlineReceived": 3000, "onlineReference": "UPI123", "notes": "" }
 ```
 `saleDate` defaults to today (IST). `cashReceived`/`onlineReceived` default to 0 and become payment records.
-Rules: weight > 0, rate > 0, payments ≥ 0, cash + online ≤ total, no future dates.
+Rules: weight > 0, totalAmount > 0, payments ≥ 0, cash + online ≤ total, no future dates.
 
 Response (also returned by GET/PATCH `/sales/:id`):
 ```json

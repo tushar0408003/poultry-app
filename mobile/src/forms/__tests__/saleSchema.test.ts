@@ -4,7 +4,7 @@ const base: SaleFormValues = {
   customer: { id: '0123456789abcdef01234567', ownerName: 'Sharma', phone: '' },
   saleDate: '2026-10-01',
   weight: '50',
-  ratePerKg: '200',
+  totalAmount: '10000',
   cashReceived: '2000',
   onlineReceived: '3000',
   onlineReference: '',
@@ -29,14 +29,15 @@ describe('sale form', () => {
 
   it('accepts a valid sale and converts it for the API', () => {
     const parsed = saleFormSchema.parse(base);
-    expect(toSaleInput(parsed)).toMatchObject({ weight: 50, ratePerKg: 200, cashReceived: 2000, onlineReceived: 3000 });
+    expect(toSaleInput(parsed)).toMatchObject({ weight: 50, totalAmount: 10000, cashReceived: 2000, onlineReceived: 3000 });
   });
 
   it.each([
     [{ customer: null }, 'Please select a customer'],
     [{ weight: '0' }, 'Weight must be more than 0'],
     [{ weight: '' }, 'Enter the weight'],
-    [{ ratePerKg: '0' }, 'Rate must be more than 0'],
+    [{ totalAmount: '0' }, 'Total price must be more than 0'],
+    [{ totalAmount: '' }, 'Enter the total price'],
     [{ cashReceived: '-5' }, 'Enter a valid amount'],
     [{ cashReceived: '6000', onlineReceived: '5000' }, 'cannot be more than the sale amount'],
   ])('rejects %p', (override, message) => {

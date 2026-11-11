@@ -8,7 +8,7 @@ import { Button, Card, Divider, ErrorState, Loading, Row, SectionTitle } from '.
 import type { RootScreenProps } from '../navigation/types';
 import { colors, font, spacing } from '../theme';
 import { formatDate } from '../utils/dates';
-import { formatINR, formatKg, paiseToINR, saleDuePaise, salePaidPaise, saleRatePerKg } from '../utils/money';
+import { formatINR, formatKg, paiseToINR, saleDuePaise, salePaidPaise } from '../utils/money';
 
 export function SaleDetailScreen({ route, navigation }: RootScreenProps<'SaleDetail'>) {
   const { id } = route.params;
@@ -76,7 +76,6 @@ export function SaleDetailScreen({ route, navigation }: RootScreenProps<'SaleDet
 
       <Card>
         <Row label="Weight" value={formatKg(sale.weight)} />
-        <Row label="Rate per kg" value={formatINR(saleRatePerKg(sale))} />
         <Row label="Total amount" value={formatINR(sale.totalAmount)} color={colors.sales} bold />
         <Divider />
         <Row label="Cash received" value={formatINR(sale.cashReceived)} color={colors.received} />

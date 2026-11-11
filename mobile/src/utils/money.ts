@@ -17,12 +17,6 @@ export function parseDecimal(text: string, scale: number): number | null {
 export const toPaise = (text: string) => parseDecimal(text, 2);
 export const toGrams = (text: string) => parseDecimal(text, 3);
 
-/** grams x paise-per-kg / 1000, rounded half-up to a paisa. */
-export function saleAmountPaise(grams: number, ratePaise: number): number {
-  const product = BigInt(grams) * BigInt(ratePaise);
-  return Number((product * 2n + 1000n) / 2000n);
-}
-
 /** Indian digit grouping: 1234567 -> "12,34,567". */
 function groupIndian(intDigits: string): string {
   if (intDigits.length <= 3) return intDigits;
@@ -60,17 +54,9 @@ export function toInputString(value: number): string {
   return value === 0 ? '' : String(value);
 }
 
-type SaleAmounts = { weight: number; totalAmount: number; cashReceived: number; onlineReceived: number };
+type SaleAmounts = { totalAmount: number; cashReceived: number; onlineReceived: number };
 
 /** The API no longer sends totalPaid / remainingBalance; derive them in paise. */
 export const salePaidPaise = (s: SaleAmounts) => Math.round(s.cashReceived * 100) + Math.round(s.onlineReceived * 100);
 export const saleDuePaise = (s: SaleAmounts) => Math.round(s.totalAmount * 100) - salePaidPaise(s);
 
-/**
- * Rate per kg in rupees, recovered from total / weight.
- * shortcut: exact only for weight >= 1 kg (total is rounded to a paisa); add ratePerKg back to the API if sub-kg sales matter.
- */
-export function saleRatePerKg(s: SaleAmounts): number {
-  const grams = Math.round(s.weight * 1000);
-  return grams ? Math.round((Math.round(s.totalAmount * 100) * 1000) / grams) / 100 : 0;
-}

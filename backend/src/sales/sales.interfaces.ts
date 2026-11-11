@@ -51,7 +51,7 @@ export interface CustomerSalesStats extends SalesTotals {
 
 export interface SeriesBucket {
   _id: string;
-  weightGrams: number;
+  weight: number;
   totalAmountPaise: number;
 }
 

@@ -12,7 +12,7 @@ const empty = (): SaleFormValues => ({
   customer: null,
   saleDate: todayString(),
   weight: '',
-  ratePerKg: '',
+  totalAmount: '',
   cashReceived: '',
   onlineReceived: '',
   onlineReference: '',
@@ -47,8 +47,8 @@ export function AddSaleScreen() {
         defaultValues={empty()}
         onSubmit={onSubmit}
         submitLabel="Save sale"
-        // Keep the date and today's rate so the next sale is even quicker.
-        resetAfterSubmit={(v) => ({ ...empty(), saleDate: v.saleDate, ratePerKg: v.ratePerKg })}
+        // Keep the date so the next sale is quicker.
+        resetAfterSubmit={(v) => ({ ...empty(), saleDate: v.saleDate })}
       />
     </Screen>
   );

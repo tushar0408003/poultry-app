@@ -7,7 +7,7 @@ import { Banner, ErrorState, Loading } from '../components/ui';
 import { SaleForm } from '../forms/SaleForm';
 import { SaleFormValues, toSaleInput } from '../forms/saleSchema';
 import type { RootScreenProps } from '../navigation/types';
-import { saleRatePerKg, toInputString } from '../utils/money';
+import { toInputString } from '../utils/money';
 
 /** Pre-fills the form; cash/online are the amounts received at the time of sale. */
 function toFormValues(sale: SaleDetail): SaleFormValues {
@@ -21,7 +21,7 @@ function toFormValues(sale: SaleDetail): SaleFormValues {
     customer: sale.customer,
     saleDate: sale.saleDate,
     weight: toInputString(sale.weight),
-    ratePerKg: toInputString(saleRatePerKg(sale)),
+    totalAmount: toInputString(sale.totalAmount),
     cashReceived: toInputString(atSale('CASH') / 100),
     onlineReceived: toInputString(atSale('ONLINE') / 100),
     onlineReference: onlineRef ?? '',

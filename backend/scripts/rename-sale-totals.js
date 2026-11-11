@@ -2,6 +2,7 @@
  * One-time migration: renames the sale payment cache fields
  *   cashPaidPaise -> cashPaid, onlinePaidPaise -> onlinePaid,
  *   totalPaidPaise -> totalPaid, remainingPaise -> remaining
+ * converts weightGrams -> weight (kg, a double), drops the old ratePaise field (sales now store only weight + total price),
  * and replaces the old remainingPaise index. Values stay in integer paise.
  *
  *   node scripts/rename-sale-totals.js                     # uses MONGODB_URI
@@ -19,8 +20,9 @@ if (!uri) throw new Error('Pass the Mongo URI or set MONGODB_URI');
   try {
     const sales = client.db().collection('sales');
     const res = await sales.updateMany(
-      { remainingPaise: { $exists: true } },
+      { $or: [{ remainingPaise: { $exists: true } }, { ratePaise: { $exists: true } }] },
       {
+        $unset: { ratePaise: '' },
         $rename: {
           cashPaidPaise: 'cashPaid',
           onlinePaidPaise: 'onlinePaid',
@@ -30,6 +32,11 @@ if (!uri) throw new Error('Pass the Mongo URI or set MONGODB_URI');
       },
     );
     console.log(`Renamed fields on ${res.modifiedCount} sale(s)`);
+    const kg = await sales.updateMany({ weightGrams: { $exists: true } }, [
+      { $set: { weight: { $divide: ['$weightGrams', 1000] } } },
+      { $unset: 'weightGrams' },
+    ]);
+    console.log(`Converted weight to kg on ${kg.modifiedCount} sale(s)`);
     if (await sales.indexExists('remainingPaise_1')) await sales.dropIndex('remainingPaise_1');
     await sales.createIndex({ remaining: 1 });
     console.log('Index remaining_1 ready');

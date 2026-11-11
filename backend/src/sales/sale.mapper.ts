@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import { formatDateOnly } from '../common/dates';
-import { gramsToKg, paiseToRupees, paymentStatus } from '../common/money';
+import { paiseToRupees, paymentStatus } from '../common/money';
 import type { Sale } from './sale.schema';
 import type { CustomerRef, CustomerSummary, SaleResponse, SaleWithCustomer } from './sales.interfaces';
 
@@ -21,7 +21,7 @@ export function toSaleResponse(sale: Sale | SaleWithCustomer): SaleResponse {
     customerId: customerIdOf(ref),
     customer: toCustomerSummary(ref),
     saleDate: formatDateOnly(sale.saleDate),
-    weight: gramsToKg(sale.weightGrams),
+    weight: sale.weight,
     totalAmount: paiseToRupees(sale.totalAmountPaise),
     cashReceived: paiseToRupees(sale.cashPaid),
     onlineReceived: paiseToRupees(sale.onlinePaid),

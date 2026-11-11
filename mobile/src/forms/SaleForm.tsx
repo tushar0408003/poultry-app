@@ -38,7 +38,7 @@ export function SaleForm({
   const values = useWatch({ control }) as SaleFormValues;
   const calc = calculateSale(values);
 
-  const rateRef = useRef<TextInputInstance>(null);
+  const totalRef = useRef<TextInputInstance>(null);
   const cashRef = useRef<TextInputInstance>(null);
   const onlineRef = useRef<TextInputInstance>(null);
 
@@ -88,7 +88,7 @@ export function SaleForm({
                   placeholder="0"
                   suffix="kg"
                   returnKeyType="next"
-                  onSubmitEditing={() => rateRef.current?.focus()}
+                  onSubmitEditing={() => totalRef.current?.focus()}
                   error={!!errors.weight}
                   accessibilityLabel="Weight in kg"
                 />
@@ -97,13 +97,13 @@ export function SaleForm({
           </Field>
         </View>
         <View style={styles.col}>
-          <Field label="Rate per kg" error={errors.ratePerKg?.message}>
+          <Field label="Total price" error={errors.totalAmount?.message}>
             <Controller
               control={control}
-              name="ratePerKg"
+              name="totalAmount"
               render={({ field }) => (
                 <Input
-                  ref={rateRef}
+                  ref={totalRef}
                   value={field.value}
                   onChangeText={field.onChange}
                   onBlur={field.onBlur}
@@ -112,18 +112,13 @@ export function SaleForm({
                   prefix="₹"
                   returnKeyType="next"
                   onSubmitEditing={() => cashRef.current?.focus()}
-                  error={!!errors.ratePerKg}
-                  accessibilityLabel="Rate per kg in rupees"
+                  error={!!errors.totalAmount}
+                  accessibilityLabel="Total price in rupees"
                 />
               )}
             />
           </Field>
         </View>
-      </View>
-
-      <View style={styles.totalBox}>
-        <Text style={styles.totalLabel}>Total amount</Text>
-        <Text style={styles.totalValue}>{paiseToINR(calc.totalPaise)}</Text>
       </View>
 
       {isEdit && (
@@ -240,17 +235,6 @@ const toNumber = (s?: string) => Number(s) || 0;
 const styles = StyleSheet.create({
   twoCol: { flexDirection: 'row', gap: spacing.md },
   col: { flex: 1 },
-  totalBox: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: colors.salesBg,
-    borderRadius: 12,
-    padding: spacing.lg,
-    marginBottom: spacing.lg,
-  },
-  totalLabel: { fontSize: font.body, color: colors.sales, fontWeight: '600' },
-  totalValue: { fontSize: font.big, color: colors.sales, fontWeight: '800' },
   hint: { fontSize: font.small, color: colors.textMuted, marginBottom: spacing.md },
   chips: { flexDirection: 'row', marginTop: -spacing.sm, marginBottom: spacing.lg },
   summary: { marginBottom: spacing.lg },

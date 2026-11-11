@@ -78,7 +78,7 @@ export interface SaleInput {
   customerId: string;
   saleDate: string;
   weight: number;
-  ratePerKg: number;
+  totalAmount: number;
   cashReceived: number;
   onlineReceived: number;
   onlineReference?: string;

@@ -1,4 +1,4 @@
-import { gramsToKg, paiseToRupees } from '../common/money';
+import { paiseToRupees } from '../common/money';
 import { formatDateOnly } from '../common/dates';
 import type { Customer } from './customer.schema';
 import type { CustomerSalesStats } from '../sales/sales.interfaces';
@@ -16,7 +16,7 @@ export function toCustomerStats(
   const offlinePaise = (stats?.cashPaidPaise ?? 0) + (payments?.cashPaise ?? 0);
   return {
     salesCount: stats?.count ?? 0,
-    weight: gramsToKg(stats?.weight ?? 0),
+    weight: stats?.weight ?? 0,
     sales: paiseToRupees(stats?.totalAmount ?? 0),
     total: paiseToRupees(totalPaise),
     onlinePayment: paiseToRupees(onlinePaise),

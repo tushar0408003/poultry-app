@@ -18,8 +18,9 @@ export class CreateSaleDto {
   @IsKg(0.001)
   weight: number;
 
+  /** Total price of the sale in rupees. */
   @IsRupees(0.01)
-  ratePerKg: number;
+  totalAmount: number;
 
   @IsOptional()
   @IsRupees(0)
@@ -62,7 +63,7 @@ export class UpdateSaleDto {
 
   @IsOptional()
   @IsRupees(0.01)
-  ratePerKg?: number;
+  totalAmount?: number;
 
   @IsOptional()
   @IsRupees(0)

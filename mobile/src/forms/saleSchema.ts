@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { CustomerSummary, SaleInput } from '../api/types';
-import { saleAmountPaise, toGrams, toPaise } from '../utils/money';
+import { toGrams, toPaise } from '../utils/money';
 
 const optionalAmount = z
   .string()
@@ -18,11 +18,11 @@ export const saleFormSchema = z
       .trim()
       .min(1, 'Enter the weight')
       .refine((v) => (toGrams(v) ?? 0) > 0, 'Weight must be more than 0 (up to 3 decimals)'),
-    ratePerKg: z
+    totalAmount: z
       .string()
       .trim()
-      .min(1, 'Enter the rate')
-      .refine((v) => (toPaise(v) ?? 0) > 0, 'Rate must be more than 0 (up to 2 decimals)'),
+      .min(1, 'Enter the total price')
+      .refine((v) => (toPaise(v) ?? 0) > 0, 'Total price must be more than 0 (up to 2 decimals)'),
     cashReceived: optionalAmount,
     onlineReceived: optionalAmount,
     onlineReference: z.string().trim().max(100),
@@ -43,11 +43,9 @@ export const saleFormSchema = z
 
 export type SaleFormValues = z.infer<typeof saleFormSchema>;
 
-/** Live totals for the form, in paise. Mirrors the server calculation exactly. */
-export function calculateSale(v: Pick<SaleFormValues, 'weight' | 'ratePerKg' | 'cashReceived' | 'onlineReceived' | 'laterPaymentsPaise'>) {
-  const grams = toGrams(v.weight) ?? 0;
-  const rate = toPaise(v.ratePerKg) ?? 0;
-  const totalPaise = grams > 0 && rate > 0 ? saleAmountPaise(grams, rate) : 0;
+/** Live totals for the form, in paise. */
+export function calculateSale(v: Pick<SaleFormValues, 'totalAmount' | 'cashReceived' | 'onlineReceived' | 'laterPaymentsPaise'>) {
+  const totalPaise = toPaise(v.totalAmount) ?? 0;
   const cashPaise = toPaise(v.cashReceived) ?? 0;
   const onlinePaise = toPaise(v.onlineReceived) ?? 0;
   const paidPaise = cashPaise + onlinePaise + v.laterPaymentsPaise;
@@ -59,7 +57,7 @@ export function toSaleInput(v: SaleFormValues): SaleInput {
     customerId: v.customer!.id,
     saleDate: v.saleDate,
     weight: Number(v.weight),
-    ratePerKg: Number(v.ratePerKg),
+    totalAmount: Number(v.totalAmount),
     cashReceived: v.cashReceived ? Number(v.cashReceived) : 0,
     onlineReceived: v.onlineReceived ? Number(v.onlineReceived) : 0,
     onlineReference: v.onlineReference || undefined,

@@ -15,9 +15,9 @@ docs/      API reference
 ## 1. Design decisions (read this first)
 
 ### Money is stored as integer paise, weight as integer grams
-`₹200.50` is stored as `20050`, `12.345 kg` as `12345`. Integers are exact in
+`₹200.50` is stored as `20050` (sale weight is stored in kg as entered). Integers are exact in
 JavaScript and in MongoDB `$sum`, so totals never drift (no `0.1 + 0.2` errors).
-`weight × rate` is computed with BigInt and rounded half-up to 1 paisa. Input is
+The sale total is entered directly (there is no per-kg rate). Input is
 parsed from its decimal *string*, never `x * 100`. The API itself speaks plain
 rupees and kg (`"totalAmount": 10000`). The mobile app uses the same integer
 math, so the live totals on the form always match what the server saves.
@@ -63,7 +63,7 @@ decided in IST (`BUSINESS_TZ_OFFSET_MINUTES=330`). Weeks run Monday–Sunday.
 | Deleting a customer with history | Blocked (409), so no sale is ever orphaned |
 | Duplicate shops ("Sharma Store" vs "sharma  store") | Prevented with a normalised unique key |
 | Future-dated sales/payments, payment before the sale date | Rejected |
-| A tiny weight × rate rounding to ₹0 | Rejected |
+| A total price of ₹0 | Rejected |
 | "Customer name required if customer-wise tracking" | Always on: every sale needs a customer, but a new shop can be added from the sale form by typing its name |
 
 ### Transactions
@@ -85,7 +85,7 @@ customers 1 ──< sales 1 ──< payments
 | Collection | Fields | Indexes |
 |---|---|---|
 | `customers` | shopName, shopNameKey (normalised, **unique**), ownerName, phone, address, createdAt, updatedAt | shopNameKey, shopName |
-| `sales` | customerId, saleDate, weightGrams, ratePaise, totalAmountPaise, cashPaidPaise, onlinePaidPaise, totalPaidPaise, remainingPaise, notes, createdAt, updatedAt | {customerId, saleDate}, {saleDate, createdAt}, remainingPaise |
+| `sales` | customerId, saleDate, weight (kg, double), totalAmountPaise, cashPaid, onlinePaid, totalPaid, remaining (all paise), notes, createdAt, updatedAt | {customerId, saleDate}, {saleDate, createdAt}, remaining |
 | `payments` | saleId, customerId, amountPaise, paymentMode (CASH/ONLINE), paymentDate, transactionReference, source (SALE_ENTRY/COLLECTION), createdAt | saleId, {customerId, paymentDate}, {paymentDate, createdAt} |
 | `users` | username (unique), passwordHash (bcrypt, 12 rounds), tokenVersion | username |
 
@@ -193,9 +193,9 @@ npm run typecheck && npx expo lint
 * **Dashboard:** today's weight, sales, cash, online, total received, and outstanding across all shops.
   Pick a date to see another day. Shows this week, this month, recent sales and payments.
   The 👥 icon opens **Customers**.
-* **Add Sale:** pick or type a shop, enter weight and rate. The total, received and balance update as you type.
+* **Add Sale:** pick or type a shop, enter weight and total price. Received and balance update as you type.
   "Full cash" / "Full online" / "Not paid" fill the payment in one tap.
-  After saving, the date and rate stay filled in for the next sale.
+  After saving, the date stays filled in for the next sale.
 * **Transactions:** search, filter by date / customer / Paid-Partial-Unpaid. Tap a sale to see its payment history,
   **Add payment**, **Edit**, or **Delete**.
 * **Reports:** Daily / Weekly / Monthly / Custom, with sales and collection charts and a comparison with the previous period.

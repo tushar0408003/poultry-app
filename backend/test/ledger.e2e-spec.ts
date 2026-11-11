@@ -92,7 +92,7 @@ describe('Supplier ledger (e2e)', () => {
         customerId: shopA,
         saleDate: '2026-10-01',
         weight: 50,
-        ratePerKg: 200,
+        totalAmount: 10000,
         cashReceived: 2000,
         onlineReceived: 3000,
         onlineReference: 'UPI123',
@@ -138,22 +138,22 @@ describe('Supplier ledger (e2e)', () => {
   describe('sale validation', () => {
     it.each([
       [{ weight: 0 }, /weight/],
-      [{ ratePerKg: 0 }, /ratePerKg/],
+      [{ totalAmount: 0 }, /totalAmount/],
       [{ cashReceived: -1 }, /cashReceived/],
       [{ cashReceived: 600, onlineReceived: 500 }, /cannot be more than the sale amount/],
       [{ saleDate: '2099-01-01' }, /future/],
       [{ saleDate: '2026-02-30' }, /YYYY-MM-DD/],
     ])('rejects %p', async (override, message) => {
-      const res = await post('/sales', { customerId: shopB, weight: 10, ratePerKg: 100, ...override }).expect(400);
+      const res = await post('/sales', { customerId: shopB, weight: 10, totalAmount: 1000, ...override }).expect(400);
       expect(JSON.stringify(res.body.message)).toMatch(message);
     });
 
     it('rejects an unknown customer', async () => {
-      await post('/sales', { customerId: '0123456789abcdef01234567', weight: 1, ratePerKg: 1 }).expect(404);
+      await post('/sales', { customerId: '0123456789abcdef01234567', weight: 1, totalAmount: 1 }).expect(404);
     });
 
-    it('calculates exactly with fractional values', async () => {
-      const res = await post('/sales', { customerId: shopB, saleDate: '2026-10-02', weight: 12.345, ratePerKg: 199.99 }).expect(201);
+    it('stores the entered total exactly, with fractional weight and price', async () => {
+      const res = await post('/sales', { customerId: shopB, saleDate: '2026-10-02', weight: 12.345, totalAmount: 2468.88 }).expect(201);
       expect(res.body.totalAmount).toBe(2468.88);
       expect(res.body.status).toBe('UNPAID');
       await del(`/sales/${res.body.id}`).expect(200);
@@ -204,13 +204,13 @@ describe('Supplier ledger (e2e)', () => {
   });
 
   describe('editing a sale recalculates the balance safely', () => {
-    it('recalculates when the weight changes', async () => {
-      const res = await patch(`/sales/${saleId}`, { weight: 40 }).expect(200);
+    it('recalculates when the total price changes', async () => {
+      const res = await patch(`/sales/${saleId}`, { weight: 40, totalAmount: 8000 }).expect(200);
       expect(res.body).toMatchObject({ totalAmount: 8000, cashReceived: 4000, onlineReceived: 3000, status: 'PARTIAL' });
     });
 
     it('refuses a new total below what has already been paid', async () => {
-      const res = await patch(`/sales/${saleId}`, { weight: 30 }).expect(400);
+      const res = await patch(`/sales/${saleId}`, { totalAmount: 6000 }).expect(400);
       expect(res.body.message).toMatch(/₹7,000.*₹6,000/);
       expect((await get(`/sales/${saleId}`)).body.totalAmount).toBe(8000);
     });
@@ -249,7 +249,7 @@ describe('Supplier ledger (e2e)', () => {
     let second: string;
 
     it('allocates FIFO', async () => {
-      second = (await post('/sales', { customerId: shopA, saleDate: '2026-10-10', weight: 10, ratePerKg: 150 }).expect(201)).body.id;
+      second = (await post('/sales', { customerId: shopA, saleDate: '2026-10-10', weight: 10, totalAmount: 1500 }).expect(201)).body.id;
       // shop A owes 3000 (old sale) + 1500 (new sale)
       const res = await post('/payments/allocate', { customerId: shopA, amount: 4000, paymentMode: 'ONLINE', paymentDate: '2026-10-11' }).expect(201);
       expect(res.body.payments.map((p: { amount: number }) => p.amount)).toEqual([3000, 1000]);
@@ -293,7 +293,7 @@ describe('Supplier ledger (e2e)', () => {
     it('is paid before sales and counted in the customer totals', async () => {
       const c = (await post('/customers', { ownerName: 'Old Dues', outstanding: 1000 }).expect(201)).body;
       expect(c.stats).toMatchObject({ total: 1000, outstandingBalance: 1000 });
-      const s = (await post('/sales', { customerId: c.id, saleDate: '2026-10-12', weight: 10, ratePerKg: 100 }).expect(201)).body.id;
+      const s = (await post('/sales', { customerId: c.id, saleDate: '2026-10-12', weight: 10, totalAmount: 1000 }).expect(201)).body.id;
 
       const res = await post('/payments/allocate', { customerId: c.id, amount: 1500, paymentMode: 'CASH', paymentDate: '2026-10-12' }).expect(201);
       expect(res.body.payments.map((p: { saleId: string | null; amount: number }) => [p.saleId, p.amount])).toEqual([[null, 1000], [s, 500]]);
@@ -312,7 +312,7 @@ describe('Supplier ledger (e2e)', () => {
 
   describe('concurrency', () => {
     it.runIf(/replicaSet=/.test(TEST_URI))('parallel payments never overpay a sale', async () => {
-      const id = (await post('/sales', { customerId: shopA, saleDate: '2026-10-20', weight: 30, ratePerKg: 100 }).expect(201)).body.id;
+      const id = (await post('/sales', { customerId: shopA, saleDate: '2026-10-20', weight: 30, totalAmount: 3000 }).expect(201)).body.id;
       const results = await Promise.all(
         Array.from({ length: 6 }, () => post('/payments', { saleId: id, amount: 1000, paymentMode: 'CASH', paymentDate: '2026-10-20' })),
       );
@@ -327,7 +327,7 @@ describe('Supplier ledger (e2e)', () => {
 
   describe('customer deletion', () => {
     it('blocks deleting a customer with sales, allows it without', async () => {
-      const s = (await post('/sales', { customerId: shopB, weight: 1, ratePerKg: 1 }).expect(201)).body.id;
+      const s = (await post('/sales', { customerId: shopB, weight: 1, totalAmount: 1 }).expect(201)).body.id;
       await del(`/customers/${shopB}`).expect(409);
       await del(`/sales/${s}`).expect(200);
       await del(`/customers/${shopB}`).expect(200);

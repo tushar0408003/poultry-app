@@ -1,5 +1,4 @@
 import {
-  computeSaleAmount,
   DecimalFormatError,
   kgToGrams,
   parseDecimal,
@@ -35,27 +34,6 @@ describe('money', () => {
 
     it('rejects too many decimal places', () => {
       expect(() => rupeesToPaise('1.234')).toThrow(/more than 2 decimal/);
-    });
-  });
-
-  describe('computeSaleAmount', () => {
-    it('matches the spec example: 50 kg x ₹200 = ₹10,000', () => {
-      expect(computeSaleAmount(kgToGrams(50), rupeesToPaise(200))).toBe(1_000_000);
-    });
-
-    it('rounds half-up to the nearest paisa', () => {
-      expect(computeSaleAmount(1005, 100)).toBe(101); // ₹1.005 -> ₹1.01
-      expect(computeSaleAmount(1004, 100)).toBe(100); // ₹1.004 -> ₹1.00
-    });
-
-    it('is exact where floats are not (1.1 kg x ₹3)', () => {
-      expect(1.1 * 3).not.toBe(3.3);
-      expect(computeSaleAmount(kgToGrams(1.1), rupeesToPaise(3))).toBe(330);
-    });
-
-    it('handles fractional weights and rates', () => {
-      // 12.345 kg x ₹199.99 = ₹2468.876... -> ₹2468.88
-      expect(computeSaleAmount(12345, 19999)).toBe(246888);
     });
   });
 

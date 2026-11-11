@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Payment, PaymentStatus, Sale } from '../api/types';
 import { colors, font, radius, spacing } from '../theme';
 import { formatDateShort } from '../utils/dates';
-import { formatINR, formatKg, paiseToINR, saleDuePaise, saleRatePerKg } from '../utils/money';
+import { formatINR, formatKg, paiseToINR, saleDuePaise } from '../utils/money';
 
 const STATUS_STYLE: Record<PaymentStatus, { fg: string; bg: string; label: string }> = {
   PAID: { fg: colors.received, bg: colors.receivedBg, label: 'Paid' },
@@ -33,7 +33,7 @@ export function SaleRow({ sale, onPress, showCustomer = true }: { sale: Sale; on
       <View style={styles.rowTop}>
         <Text style={styles.sub}>
           {showCustomer ? `${formatDateShort(sale.saleDate)} · ` : ''}
-          {formatKg(sale.weight)} × {formatINR(saleRatePerKg(sale))}
+          {formatKg(sale.weight)}
         </Text>
         <StatusBadge status={sale.status} />
       </View>

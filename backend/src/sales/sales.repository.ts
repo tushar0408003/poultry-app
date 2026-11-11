@@ -10,7 +10,7 @@ const EMPTY_TOTALS: SalesTotals = { count: 0, weight: 0, totalAmount: 0, totalPa
 
 const totalsGroup = {
   count: { $sum: 1 },
-  weight: { $sum: '$weightGrams' },
+  weight: { $sum: '$weight' },
   totalAmount: { $sum: '$totalAmountPaise' },
   totalPaid: { $sum: '$totalPaid' },
   remaining: { $sum: '$remaining' },
@@ -127,7 +127,7 @@ export class SalesRepository {
         {
           $group: {
             _id: { $dateToString: { date: '$saleDate', format, timezone: 'UTC' } },
-            weightGrams: { $sum: '$weightGrams' },
+            weight: { $sum: '$weight' },
             totalAmountPaise: { $sum: '$totalAmountPaise' },
           },
         },

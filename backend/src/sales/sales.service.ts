@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { QueryFilter, Types } from 'mongoose';
 import { BusinessClock } from '../common/business-clock.service';
 import { addDays, formatDateOnly, parseDateOnly } from '../common/dates';
-import { computeSaleAmount, formatInr, kgToGrams, rupeesToPaise } from '../common/money';
+import { formatInr, PAISE_PER_RUPEE } from '../common/money';
 import { paginated, Paginated } from '../common/pagination.dto';
 import { CustomersRepository } from '../customers/customers.repository';
 import { TransactionService } from '../database/transaction.service';
@@ -36,12 +36,12 @@ export class SalesService {
     const saleDate = dto.saleDate ? parseDateOnly(dto.saleDate) : this.clock.today();
     this.assertNotFuture(saleDate, 'Sale date');
 
-    const weightGrams = kgToGrams(dto.weight);
-    const ratePaise = rupeesToPaise(dto.ratePerKg);
-    const totalAmountPaise = this.saleAmount(weightGrams, ratePaise);
-    const cashPaise = rupeesToPaise(dto.cashReceived ?? 0);
-    const onlinePaise = rupeesToPaise(dto.onlineReceived ?? 0);
-    assertNotOverpaid(cashPaise + onlinePaise, totalAmountPaise);
+    // All in integer grams / paise, the units the sale is stored in.
+    const weight = dto.weight;
+    const totalAmount = toPaise(dto.totalAmount);
+    const cashReceived = toPaise(dto.cashReceived ?? 0);
+    const onlineReceived = toPaise(dto.onlineReceived ?? 0);
+    assertNotOverpaid(cashReceived + onlineReceived, totalAmount);
 
     const saleId = await this.tx.run(async (session) => {
       if (!(await this.customers.findById(customerId, session))) throw new NotFoundException('Customer not found');
@@ -49,18 +49,17 @@ export class SalesService {
         {
           customerId,
           saleDate,
-          weightGrams,
-          ratePaise,
-          totalAmountPaise,
-          ...computeTotals(totalAmountPaise, cashPaise, onlinePaise),
+          weight,
+          totalAmountPaise: totalAmount,
+          ...computeTotals(totalAmount, cashReceived, onlineReceived),
           notes: dto.notes ?? '',
         },
         session,
       );
       await this.payments.insertMany(
         [
-          ...saleEntryPayment(sale, PaymentMode.CASH, cashPaise),
-          ...saleEntryPayment(sale, PaymentMode.ONLINE, onlinePaise, dto.onlineReference),
+          ...saleEntryPayment(sale, PaymentMode.CASH, cashReceived),
+          ...saleEntryPayment(sale, PaymentMode.ONLINE, onlineReceived, dto.onlineReference),
         ],
         session,
       );
@@ -128,13 +127,12 @@ export class SalesService {
       const dateChanged = saleDate.getTime() !== sale.saleDate.getTime();
       if (dateChanged) this.assertNotFuture(saleDate, 'Sale date');
 
-      const weightGrams = dto.weight !== undefined ? kgToGrams(dto.weight) : sale.weightGrams;
-      const ratePaise = dto.ratePerKg !== undefined ? rupeesToPaise(dto.ratePerKg) : sale.ratePaise;
-      const totalAmountPaise = this.saleAmount(weightGrams, ratePaise);
+      const weight = dto.weight ?? sale.weight;
+      const totalAmountPaise = dto.totalAmount !== undefined ? toPaise(dto.totalAmount) : sale.totalAmountPaise;
 
       const replace = {
-        [PaymentMode.CASH]: dto.cashReceived !== undefined ? rupeesToPaise(dto.cashReceived) : undefined,
-        [PaymentMode.ONLINE]: dto.onlineReceived !== undefined ? rupeesToPaise(dto.onlineReceived) : undefined,
+        [PaymentMode.CASH]: dto.cashReceived !== undefined ? toPaise(dto.cashReceived) : undefined,
+        [PaymentMode.ONLINE]: dto.onlineReceived !== undefined ? toPaise(dto.onlineReceived) : undefined,
       };
 
       const existing = await this.payments.findBySale(id, session);
@@ -174,8 +172,7 @@ export class SalesService {
         {
           customerId,
           saleDate,
-          weightGrams,
-          ratePaise,
+          weight,
           totalAmountPaise,
           ...(dto.notes !== undefined && { notes: dto.notes }),
         },
@@ -195,12 +192,6 @@ export class SalesService {
       await this.sales.deleteById(id, session);
       return { deleted: true as const, paymentsDeleted };
     });
-  }
-
-  private saleAmount(weightGrams: number, ratePaise: number): number {
-    const total = computeSaleAmount(weightGrams, ratePaise);
-    if (total <= 0) throw new BadRequestException('Sale amount must be at least ₹0.01');
-    return total;
   }
 
   private assertNotFuture(date: Date, label: string): void {
@@ -235,3 +226,7 @@ function saleEntryPayment(
     },
   ];
 }
+
+// The DTO validator allows at most 2 decimals and caps the size,
+// so rounding the scaled float is exact; round() only removes float noise (1.15 * 100 = 114.999...).
+const toPaise = (rupees: number) => Math.round(rupees * PAISE_PER_RUPEE);

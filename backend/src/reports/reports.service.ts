@@ -14,7 +14,7 @@ import {
   rangeDays,
   weekRange,
 } from '../common/dates';
-import { gramsToKg, paiseToRupees } from '../common/money';
+import { paiseToRupees } from '../common/money';
 import { PaymentsRepository } from '../payments/payments.repository';
 import { SalesRepository } from '../sales/sales.repository';
 import type { CurrentOutstanding, PeriodSummary, Report, SeriesPoint } from './reports.interfaces';
@@ -65,7 +65,7 @@ export class ReportsService {
       to: formatDateOnly(lastDayOf(range)),
       sales: {
         count: sales.count,
-        totalWeight: gramsToKg(sales.weight),
+        totalWeight: sales.weight,
         totalAmount: paiseToRupees(sales.totalAmount),
         paidSoFar: paiseToRupees(sales.totalPaid),
         stillUnpaid: paiseToRupees(sales.remaining),
@@ -122,7 +122,7 @@ export class ReportsService {
       const onlinePaise = p?.onlinePaise ?? 0;
       return {
         label,
-        weight: gramsToKg(s?.weightGrams ?? 0),
+        weight: s?.weight ?? 0,
         sales: paiseToRupees(s?.totalAmountPaise ?? 0),
         cash: paiseToRupees(cashPaise),
         online: paiseToRupees(onlinePaise),
