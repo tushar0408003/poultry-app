@@ -8,15 +8,9 @@ const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? val
 export class CreateCustomerDto {
   @Transform(trim)
   @IsString()
-  @IsNotEmpty({ message: 'Shop name is required' })
+  @IsNotEmpty({ message: 'Owner name is required' })
   @MaxLength(120)
-  shopName: string;
-
-  @IsOptional()
-  @Transform(trim)
-  @IsString()
-  @MaxLength(120)
-  ownerName?: string;
+  ownerName: string;
 
   /** Optional so a new shop can be added from the sale form with just its name. */
   @IsOptional()
@@ -31,10 +25,9 @@ export class CreateCustomerDto {
   @MaxLength(300)
   address?: string;
 
-  /** Dues carried over from before the app, in rupees. */
-  @IsOptional()
+  /** Dues carried over from before the app, in rupees (0 if none). */
   @IsRupees(0)
-  outstanding?: number;
+  outstanding: number;
 }
 
 export class UpdateCustomerDto extends PartialType(CreateCustomerDto) {}

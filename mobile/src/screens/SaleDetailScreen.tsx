@@ -23,7 +23,7 @@ export function SaleDetailScreen({ route, navigation }: RootScreenProps<'SaleDet
     const n = sale.payments.length;
     Alert.alert(
       'Delete this sale?',
-      `${formatINR(sale.totalAmount)} sale to ${sale.customer?.shopName ?? 'customer'} on ${formatDate(sale.saleDate)}.` +
+      `${formatINR(sale.totalAmount)} sale to ${sale.customer?.ownerName ?? 'customer'} on ${formatDate(sale.saleDate)}.` +
         (n > 0 ? `\n\nIts ${n} payment record${n === 1 ? '' : 's'} (${formatINR(sale.totalPaid)}) will also be deleted.` : '') +
         '\n\nThis cannot be undone.',
       [
@@ -67,7 +67,7 @@ export function SaleDetailScreen({ route, navigation }: RootScreenProps<'SaleDet
             style={styles.shop}
             onPress={() => sale.customer && navigation.navigate('CustomerDetail', { id: sale.customer.id })}
           >
-            {sale.customer?.shopName ?? 'Unknown shop'}
+            {sale.customer?.ownerName ?? 'Unknown customer'}
           </Text>
           <Text style={styles.date}>{formatDate(sale.saleDate)}</Text>
         </View>

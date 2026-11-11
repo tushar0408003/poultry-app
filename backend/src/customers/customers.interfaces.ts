@@ -13,7 +13,6 @@ export interface CustomerStatsResponse {
 
 export interface CustomerResponse {
   id: string;
-  shopName: string;
   ownerName: string;
   phone: string;
   address: string;

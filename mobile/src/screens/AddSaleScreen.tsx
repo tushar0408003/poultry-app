@@ -30,7 +30,7 @@ export function AddSaleScreen() {
       const sale = await createSale.mutateAsync(toSaleInput(values));
       setBanner({
         tone: 'success',
-        message: `Saved: ${formatINR(sale.totalAmount)} to ${sale.customer?.shopName ?? 'customer'}` +
+        message: `Saved: ${formatINR(sale.totalAmount)} to ${sale.customer?.ownerName ?? 'customer'}` +
           (sale.remainingBalance > 0 ? ` · Due ${formatINR(sale.remainingBalance)}` : ' · Fully paid'),
       });
       return true;

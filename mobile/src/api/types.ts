@@ -14,7 +14,6 @@ export interface Paginated<T> {
 
 export interface CustomerSummary {
   id: string;
-  shopName: string;
   ownerName: string;
   phone: string;
 }
@@ -39,11 +38,10 @@ export interface Customer extends CustomerSummary {
 }
 
 export interface CustomerInput {
-  shopName: string;
-  ownerName?: string;
+  ownerName: string;
   phone?: string;
   address?: string;
-  outstanding?: number;
+  outstanding: number;
 }
 
 export interface Payment {

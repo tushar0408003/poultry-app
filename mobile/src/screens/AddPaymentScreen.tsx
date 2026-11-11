@@ -23,7 +23,7 @@ export function AddPaymentScreen({ route, navigation }: RootScreenProps<'AddPaym
   return (
     <Screen>
       <Text style={styles.context}>
-        {sale.customer?.shopName} · {formatDate(sale.saleDate)} · Sale {formatINR(sale.totalAmount)}
+        {sale.customer?.ownerName} · {formatDate(sale.saleDate)} · Sale {formatINR(sale.totalAmount)}
       </Text>
       <PaymentForm
         duePaise={Math.round(sale.remainingBalance * 100)}

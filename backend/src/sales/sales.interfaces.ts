@@ -13,7 +13,6 @@ export interface SaleTotals {
 
 export interface CustomerSummary {
   id: string;
-  shopName: string;
   ownerName: string;
   phone: string;
 }
@@ -36,7 +35,7 @@ export interface SaleResponse {
   updatedAt: Date;
 }
 
-export type CustomerRef = Pick<Customer, '_id' | 'shopName' | 'ownerName' | 'phone'>;
+export type CustomerRef = Pick<Customer, '_id' | 'ownerName' | 'phone'>;
 
 export type SaleWithCustomer = Omit<Sale, 'customerId'> & { customerId: CustomerRef | null };
 

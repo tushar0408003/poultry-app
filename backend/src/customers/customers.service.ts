@@ -3,7 +3,7 @@ import { Types } from 'mongoose';
 import { formatInr, rupeesToPaise } from '../common/money';
 import { PaymentsRepository } from '../payments/payments.repository';
 import { SalesRepository } from '../sales/sales.repository';
-import { Customer, normaliseShopName } from './customer.schema';
+import { Customer } from './customer.schema';
 import { toCustomerResponse } from './customer.mapper';
 import { CustomersRepository } from './customers.repository';
 import { CreateCustomerDto, UpdateCustomerDto } from './dto/customer.dto';
@@ -18,14 +18,11 @@ export class CustomersService {
   ) {}
 
   async create(dto: CreateCustomerDto): Promise<CustomerResponse> {
-    await this.assertUniqueName(dto.shopName);
     const created = await this.customers.create({
-      shopName: dto.shopName.replace(/\s+/g, ' '),
-      shopNameKey: normaliseShopName(dto.shopName),
-      ownerName: dto.ownerName ?? '',
+      ownerName: dto.ownerName,
       phone: dto.phone ?? '',
       address: dto.address ?? '',
-      outstandingPaise: rupeesToPaise(dto.outstanding ?? 0),
+      outstandingPaise: rupeesToPaise(dto.outstanding),
     });
     return toCustomerResponse(created);
   }
@@ -54,11 +51,6 @@ export class CustomersService {
 
   async update(id: Types.ObjectId, dto: UpdateCustomerDto): Promise<CustomerResponse> {
     const set: Record<string, string | number> = {};
-    if (dto.shopName !== undefined) {
-      await this.assertUniqueName(dto.shopName, id);
-      set.shopName = dto.shopName.replace(/\s+/g, ' ');
-      set.shopNameKey = normaliseShopName(dto.shopName);
-    }
     if (dto.ownerName !== undefined) set.ownerName = dto.ownerName;
     if (dto.phone !== undefined) set.phone = dto.phone;
     if (dto.address !== undefined) set.address = dto.address;
@@ -94,12 +86,5 @@ export class CustomersService {
       this.payments.customerPaymentStats([customer._id]),
     ]);
     return toCustomerResponse(customer, stats, payments);
-  }
-
-  /** Friendly check; the unique index on shopNameKey still guards against races. */
-  private async assertUniqueName(shopName: string, excludeId?: Types.ObjectId): Promise<void> {
-    if (await this.customers.existsByShopNameKey(normaliseShopName(shopName), excludeId)) {
-      throw new ConflictException(`A customer named "${shopName.trim()}" already exists`);
-    }
   }
 }

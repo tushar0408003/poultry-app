@@ -57,7 +57,7 @@ export function SaleForm({
 
   return (
     <View>
-      <Field label="Shop / Customer" error={errors.customer?.message}>
+      <Field label="Customer" error={errors.customer?.message}>
         <Controller
           control={control}
           name="customer"

@@ -31,7 +31,7 @@ export function CustomersScreen({ navigation }: RootScreenProps<'Customers'>) {
       keyboardShouldPersistTaps="handled"
       ListHeaderComponent={
         <View style={styles.header}>
-          <Input value={search} onChangeText={setSearch} placeholder="Search shop, owner or phone" />
+          <Input value={search} onChangeText={setSearch} placeholder="Search name or phone" />
           {data && data.length > 0 && (
             <Text style={styles.summary}>
               {data.length} customer{data.length === 1 ? '' : 's'} · Total due{' '}
@@ -46,7 +46,7 @@ export function CustomersScreen({ navigation }: RootScreenProps<'Customers'>) {
         ) : error ? (
           <ErrorState message={errorMessage(error)} onRetry={refetch} />
         ) : (
-          <EmptyState icon="people-outline" message={debounced ? 'No customers match your search.' : 'No customers yet. Tap + to add one, or add a shop while entering a sale.'} />
+          <EmptyState icon="people-outline" message={debounced ? 'No customers match your search.' : 'No customers yet. Tap + to add one, or add one while entering a sale.'} />
         )
       }
       renderItem={({ item }) => (
@@ -55,8 +55,8 @@ export function CustomersScreen({ navigation }: RootScreenProps<'Customers'>) {
           onPress={() => navigation.navigate('CustomerDetail', { id: item.id })}
         >
           <View style={{ flex: 1 }}>
-            <Text style={styles.name}>{item.shopName}</Text>
-            <Text style={styles.sub}>{[item.ownerName, item.phone].filter(Boolean).join(' · ') || `${item.stats.salesCount} sales`}</Text>
+            <Text style={styles.name}>{item.ownerName}</Text>
+            <Text style={styles.sub}>{item.phone || `${item.stats.salesCount} sales`}</Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
             <Text style={[styles.due, item.stats.outstandingBalance === 0 && { color: colors.received }]}>

@@ -1,7 +1,7 @@
 import { calculateSale, SaleFormValues, saleFormSchema, toSaleInput } from '../saleSchema';
 
 const base: SaleFormValues = {
-  customer: { id: '0123456789abcdef01234567', shopName: 'Sharma', ownerName: '', phone: '' },
+  customer: { id: '0123456789abcdef01234567', ownerName: 'Sharma', phone: '' },
   saleDate: '2026-10-01',
   weight: '50',
   ratePerKg: '200',
@@ -33,7 +33,7 @@ describe('sale form', () => {
   });
 
   it.each([
-    [{ customer: null }, 'Please select a shop'],
+    [{ customer: null }, 'Please select a customer'],
     [{ weight: '0' }, 'Weight must be more than 0'],
     [{ weight: '' }, 'Enter the weight'],
     [{ ratePerKg: '0' }, 'Rate must be more than 0'],
