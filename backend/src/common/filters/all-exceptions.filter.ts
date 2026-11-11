@@ -59,7 +59,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
     if (isDuplicateKeyError(exception)) {
       const field = Object.keys(exception.keyPattern ?? {})[0] ?? 'value';
-      return { status: HttpStatus.CONFLICT, message: `A record with this ${humanField(field)} already exists` };
+      return { status: HttpStatus.CONFLICT, message: `A record with this ${field} already exists` };
     }
     return { status: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Something went wrong. Please try again.' };
   }
@@ -67,9 +67,4 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
 function isDuplicateKeyError(e: unknown): e is { code: number; keyPattern?: Record<string, unknown> } {
   return typeof e === 'object' && e !== null && (e as { code?: unknown }).code === 11000;
-}
-
-function humanField(field: string): string {
-  if (field === 'shopNameKey') return 'shop name';
-  return field;
 }

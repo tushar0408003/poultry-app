@@ -38,7 +38,7 @@ export function TransactionsScreen({ navigation }: TabScreenProps<'Transactions'
 
   const header = (
     <View style={styles.filters}>
-      <Input value={search} onChangeText={setSearch} placeholder="Search shop name or phone" returnKeyType="search" clearButtonMode="while-editing" />
+      <Input value={search} onChangeText={setSearch} placeholder="Search customer name or phone" returnKeyType="search" clearButtonMode="while-editing" />
       <View style={styles.filterRow}>
         <View style={{ flex: 1 }}>
           {date ? (

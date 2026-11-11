@@ -11,14 +11,14 @@ import { useDebounced } from '../utils/useDebounced';
 import { Banner, IconButton, Input } from './ui';
 
 /**
- * Select a shop with search, or add a new one by just typing its name —
+ * Select a customer with search, or add a new one by just typing their name —
  * so a sale for a new customer still takes only a few seconds.
  */
 export function CustomerPicker({
   value,
   onChange,
   error,
-  placeholder = 'Select shop',
+  placeholder = 'Select customer',
 }: {
   value: CustomerSummary | null;
   onChange: (c: CustomerSummary | null) => void;
@@ -32,7 +32,7 @@ export function CustomerPicker({
   const createCustomer = useCreateCustomer();
 
   const typed = search.trim();
-  const exactMatch = data?.some((c) => c.shopName.toLowerCase() === typed.toLowerCase());
+  const exactMatch = data?.some((c) => c.ownerName.toLowerCase() === typed.toLowerCase());
 
   const select = (c: CustomerSummary | null) => {
     onChange(c);
@@ -43,7 +43,7 @@ export function CustomerPicker({
 
   const addNew = async () => {
     try {
-      const c = await createCustomer.mutateAsync({ shopName: typed });
+      const c = await createCustomer.mutateAsync({ ownerName: typed, outstanding: 0 });
       select(c);
     } catch {
       // error shown below via createCustomer.error
@@ -54,13 +54,13 @@ export function CustomerPicker({
     <>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={value ? `Customer: ${value.shopName}. Tap to change` : placeholder}
+        accessibilityLabel={value ? `Customer: ${value.ownerName}. Tap to change` : placeholder}
         onPress={() => setOpen(true)}
         style={[styles.box, error && { borderColor: colors.danger }]}
       >
         <Ionicons name="storefront-outline" size={20} color={colors.primary} />
         <Text style={[styles.boxText, !value && { color: colors.textMuted, fontWeight: '400' }]} numberOfLines={1}>
-          {value ? value.shopName : placeholder}
+          {value ? value.ownerName : placeholder}
         </Text>
         <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
       </Pressable>
@@ -68,12 +68,12 @@ export function CustomerPicker({
       <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}>
         <SafeAreaView style={styles.modal}>
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>Select shop</Text>
+            <Text style={styles.headerTitle}>Select customer</Text>
             <IconButton icon="close" label="Close" onPress={() => setOpen(false)} />
           </View>
           <Input
             autoFocus
-            placeholder="Search or type a new shop name"
+            placeholder="Search or type a new customer name"
             value={search}
             onChangeText={setSearch}
             autoCapitalize="words"
@@ -90,7 +90,7 @@ export function CustomerPicker({
               ) : (
                 <Ionicons name="add-circle" size={24} color={colors.primary} />
               )}
-              <Text style={styles.addText}>Add new shop “{typed}”</Text>
+              <Text style={styles.addText}>Add new customer “{typed}”</Text>
             </Pressable>
           )}
 
@@ -99,14 +99,14 @@ export function CustomerPicker({
             keyExtractor={(c) => c.id}
             keyboardShouldPersistTaps="handled"
             ListEmptyComponent={
-              isFetching ? <ActivityIndicator style={{ marginTop: spacing.xl }} /> : <Text style={styles.empty}>No shops found</Text>
+              isFetching ? <ActivityIndicator style={{ marginTop: spacing.xl }} /> : <Text style={styles.empty}>No customers found</Text>
             }
             renderItem={({ item }) => (
               <Pressable style={[styles.item, value?.id === item.id && styles.itemActive]} onPress={() => select(item)}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.itemTitle}>{item.shopName}</Text>
-                  {(item.ownerName || item.phone) && (
-                    <Text style={styles.itemSub}>{[item.ownerName, item.phone].filter(Boolean).join(' · ')}</Text>
+                  <Text style={styles.itemTitle}>{item.ownerName}</Text>
+                  {!!item.phone && (
+                    <Text style={styles.itemSub}>{item.phone}</Text>
                   )}
                 </View>
                 {item.stats.outstandingBalance > 0 && (

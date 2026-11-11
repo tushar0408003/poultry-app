@@ -24,7 +24,7 @@ export function CollectPaymentScreen({ route, navigation }: RootScreenProps<'Col
 
   return (
     <Screen>
-      <Text style={styles.shop}>{customer.shopName}</Text>
+      <Text style={styles.shop}>{customer.ownerName}</Text>
       <Text style={styles.hint}>The payment clears the outstanding first, then the oldest unpaid sales.</Text>
       <PaymentForm
         duePaise={Math.round(customer.stats.outstandingBalance * 100)}

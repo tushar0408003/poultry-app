@@ -11,7 +11,7 @@ export const saleFormSchema = z
   .object({
     customer: z
       .custom<CustomerSummary | null>()
-      .refine((c) => Boolean(c), 'Please select a shop'),
+      .refine((c) => Boolean(c), 'Please select a customer'),
     saleDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     weight: z
       .string()

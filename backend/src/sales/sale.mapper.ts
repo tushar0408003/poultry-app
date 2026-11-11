@@ -5,8 +5,8 @@ import type { Sale } from './sale.schema';
 import type { CustomerRef, CustomerSummary, SaleResponse, SaleWithCustomer } from './sales.interfaces';
 
 export function toCustomerSummary(ref: CustomerRef | Types.ObjectId | null): CustomerSummary | null {
-  if (!ref || ref instanceof Types.ObjectId || !('shopName' in ref)) return null;
-  return { id: ref._id.toString(), shopName: ref.shopName, ownerName: ref.ownerName ?? '', phone: ref.phone ?? '' };
+  if (!ref || ref instanceof Types.ObjectId || !('ownerName' in ref)) return null;
+  return { id: ref._id.toString(), ownerName: ref.ownerName ?? '', phone: ref.phone ?? '' };
 }
 
 function customerIdOf(ref: CustomerRef | Types.ObjectId | null): string {

@@ -66,23 +66,21 @@ describe('Supplier ledger (e2e)', () => {
   let shopB: string;
 
   describe('customers', () => {
-    it('creates customers with only a shop name required', async () => {
-      const a = await post('/customers', { shopName: 'Sharma  Chicken Centre', ownerName: 'Ravi', phone: '9876543210' }).expect(201);
-      expect(a.body.shopName).toBe('Sharma Chicken Centre');
+    it('creates customers with only owner name and outstanding required', async () => {
+      const a = await post('/customers', { ownerName: 'Ravi', phone: '9876543210', outstanding: 0 }).expect(201);
+      expect(a.body.ownerName).toBe('Ravi');
+      expect(a.body).not.toHaveProperty('shopName');
       expect(a.body.stats.outstandingBalance).toBe(0);
       shopA = a.body.id;
-      shopB = (await post('/customers', { shopName: 'Gupta Meat Shop' }).expect(201)).body.id;
-    });
-
-    it('prevents duplicate shop names, ignoring case and spacing', async () => {
-      const res = await post('/customers', { shopName: ' sharma chicken   centre ' }).expect(409);
-      expect(res.body.message).toMatch(/already exists/);
+      shopB = (await post('/customers', { ownerName: 'Gupta', outstanding: 0 }).expect(201)).body.id;
     });
 
     it('validates input', async () => {
-      await post('/customers', { shopName: '' }).expect(400);
-      await post('/customers', { shopName: 'X', phone: 'abc' }).expect(400);
-      await post('/customers', { shopName: 'X', unknownField: 1 }).expect(400);
+      await post('/customers', { outstanding: 0 }).expect(400);
+      await post('/customers', { ownerName: '', outstanding: 0 }).expect(400);
+      await post('/customers', { ownerName: 'X' }).expect(400);
+      await post('/customers', { ownerName: 'X', outstanding: 0, phone: 'abc' }).expect(400);
+      await post('/customers', { ownerName: 'X', outstanding: 0, shopName: 'Old field' }).expect(400);
     });
   });
 
@@ -268,7 +266,7 @@ describe('Supplier ledger (e2e)', () => {
     it('filters transactions by payment status and search', async () => {
       const paid = (await get('/sales?status=PAID').expect(200)).body;
       expect(paid.items.map((s: { id: string }) => s.id)).toEqual([saleId]);
-      const partial = (await get('/sales?status=PARTIAL&search=sharma').expect(200)).body;
+      const partial = (await get('/sales?status=PARTIAL&search=ravi').expect(200)).body;
       expect(partial.items.map((s: { id: string }) => s.id)).toEqual([second]);
       expect((await get('/sales?search=gupta').expect(200)).body.total).toBe(0);
       expect((await get('/sales?date=2026-10-10').expect(200)).body.total).toBe(1);
@@ -295,7 +293,7 @@ describe('Supplier ledger (e2e)', () => {
 
   describe('outstanding', () => {
     it('is paid before sales and counted in the customer totals', async () => {
-      const c = (await post('/customers', { shopName: 'Old Dues Shop', outstanding: 1000 }).expect(201)).body;
+      const c = (await post('/customers', { ownerName: 'Old Dues', outstanding: 1000 }).expect(201)).body;
       expect(c.stats).toMatchObject({ total: 1000, outstandingBalance: 1000 });
       const s = (await post('/sales', { customerId: c.id, saleDate: '2026-10-12', weight: 10, ratePerKg: 100 }).expect(201)).body.id;
 

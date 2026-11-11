@@ -33,7 +33,6 @@ export function toCustomerResponse(
 ): CustomerResponse {
   return {
     id: c._id.toString(),
-    shopName: c.shopName,
     ownerName: c.ownerName ?? '',
     phone: c.phone ?? '',
     address: c.address ?? '',

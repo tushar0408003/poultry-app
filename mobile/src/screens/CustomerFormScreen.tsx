@@ -9,8 +9,7 @@ import { Banner, Button, Field, Input, Loading } from '../components/ui';
 import type { RootScreenProps } from '../navigation/types';
 
 const schema = z.object({
-  shopName: z.string().trim().min(1, 'Shop name is required').max(120),
-  ownerName: z.string().trim().max(120),
+  ownerName: z.string().trim().min(1, 'Customer name is required').max(120),
   phone: z
     .string()
     .trim()
@@ -19,7 +18,7 @@ const schema = z.object({
   outstanding: z
     .string()
     .trim()
-    .refine((v) => v === '' || /^\d+(\.\d{1,2})?$/.test(v), 'Enter an amount like 1500 or 1500.50'),
+    .refine((v) => /^\d+(\.\d{1,2})?$/.test(v), 'Enter an amount like 0, 1500 or 1500.50'),
 });
 type CustomerFormValues = z.infer<typeof schema>;
 
@@ -37,22 +36,22 @@ export function CustomerFormScreen({ route, navigation }: RootScreenProps<'Custo
     formState: { errors, isSubmitting },
   } = useForm<CustomerFormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { shopName: '', ownerName: '', phone: '', address: '', outstanding: '' },
+    defaultValues: { ownerName: '', phone: '', address: '', outstanding: '' },
   });
 
   useLayoutEffect(() => navigation.setOptions({ title: id ? 'Edit customer' : 'New customer' }), [navigation, id]);
 
   useEffect(() => {
     if (existing.data) {
-      const { shopName, ownerName, phone, address, outstanding } = existing.data;
-      reset({ shopName, ownerName, phone, address, outstanding: outstanding ? String(outstanding) : '' });
+      const { ownerName, phone, address, outstanding } = existing.data;
+      reset({ ownerName, phone, address, outstanding: String(outstanding) });
     }
   }, [existing.data, reset]);
 
   if (id && existing.isLoading) return <Loading />;
 
   const submit = handleSubmit(async ({ outstanding, ...rest }) => {
-    const values = { ...rest, outstanding: outstanding === '' ? 0 : Number(outstanding) };
+    const values = { ...rest, outstanding: Number(outstanding) };
     try {
       if (id) {
         await update.mutateAsync(values);
@@ -81,11 +80,10 @@ export function CustomerFormScreen({ route, navigation }: RootScreenProps<'Custo
   return (
     <Screen>
       {errors.root?.message && <Banner tone="error" message={errors.root.message} />}
-      {text('shopName', 'Shop name', { autoCapitalize: 'words', placeholder: 'e.g. Sharma Chicken Centre', autoFocus: !id })}
-      {text('ownerName', 'Owner name (optional)', { autoCapitalize: 'words' })}
+      {text('ownerName', 'Customer name', { autoCapitalize: 'words', autoFocus: !id })}
       {text('phone', 'Phone number (optional)', { keyboardType: 'phone-pad' })}
       {text('address', 'Address (optional)', { multiline: true })}
-      {text('outstanding', 'Outstanding ₹ (optional)', { keyboardType: 'decimal-pad', placeholder: 'Old dues before using the app' })}
+      {text('outstanding', 'Outstanding ₹', { keyboardType: 'decimal-pad', placeholder: 'Old dues before using the app, 0 if none' })}
       <Button title={id ? 'Save changes' : 'Add customer'} icon="checkmark" onPress={submit} loading={isSubmitting} />
     </Screen>
   );

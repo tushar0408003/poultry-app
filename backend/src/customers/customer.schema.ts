@@ -6,13 +6,6 @@ export class Customer {
   _id: Types.ObjectId;
 
   @Prop({ required: true, trim: true, maxlength: 120 })
-  shopName: string;
-
-  /** Normalised shop name (lower-case, single spaces) used to prevent duplicates. */
-  @Prop({ required: true, unique: true })
-  shopNameKey: string;
-
-  @Prop({ trim: true, default: '', maxlength: 120 })
   ownerName: string;
 
   @Prop({ trim: true, default: '', maxlength: 20 })
@@ -31,8 +24,4 @@ export class Customer {
 
 export type CustomerDocument = HydratedDocument<Customer>;
 export const CustomerSchema = SchemaFactory.createForClass(Customer);
-CustomerSchema.index({ shopName: 1 });
-
-export function normaliseShopName(name: string): string {
-  return name.trim().replace(/\s+/g, ' ').toLowerCase();
-}
+CustomerSchema.index({ ownerName: 1 });

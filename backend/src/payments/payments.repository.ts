@@ -38,7 +38,7 @@ export class PaymentsRepository {
         .sort({ paymentDate: -1, createdAt: -1, _id: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
-        .populate('customerId', 'shopName ownerName phone')
+        .populate('customerId', 'ownerName phone')
         .lean<PaymentWithCustomer[]>()
         .exec(),
       this.model.countDocuments(filter).exec(),
@@ -145,7 +145,7 @@ export class PaymentsRepository {
       .find({ paymentDate: { $lte: onOrBefore } })
       .sort({ paymentDate: -1, createdAt: -1, _id: -1 })
       .limit(limit)
-      .populate('customerId', 'shopName ownerName phone')
+      .populate('customerId', 'ownerName phone')
       .lean<PaymentWithCustomer[]>()
       .exec();
   }

@@ -22,10 +22,10 @@ export function CustomerDetailScreen({ route, navigation }: RootScreenProps<'Cus
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: customer?.shopName ?? 'Customer',
+      title: customer?.ownerName ?? 'Customer',
       headerRight: () => <IconButton icon="create-outline" label="Edit customer" onPress={() => navigation.navigate('CustomerForm', { id })} />,
     });
-  }, [navigation, customer?.shopName, id]);
+  }, [navigation, customer, id]);
 
   if (isLoading) return <Loading />;
   if (error || !customer) return <ErrorState message={errorMessage(error)} onRetry={refetch} />;
@@ -36,7 +36,7 @@ export function CustomerDetailScreen({ route, navigation }: RootScreenProps<'Cus
   const active = tab === 'sales' ? sales : payments;
 
   const confirmDelete = () =>
-    Alert.alert('Delete customer?', `${customer.shopName} will be removed. This cannot be undone.`, [
+    Alert.alert('Delete customer?', `${customer.ownerName} will be removed. This cannot be undone.`, [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',
@@ -61,9 +61,8 @@ export function CustomerDetailScreen({ route, navigation }: RootScreenProps<'Cus
       }}
       refreshing={isRefetching}
     >
-      {(customer.ownerName || customer.phone || customer.address) && (
+      {(customer.phone || customer.address) && (
         <View style={styles.contact}>
-          {customer.ownerName ? <Text style={styles.contactText}>{customer.ownerName}</Text> : null}
           {customer.phone ? (
             <Text style={[styles.contactText, styles.phone]} onPress={() => Linking.openURL(`tel:${customer.phone}`)}>
               {customer.phone}

@@ -5,7 +5,7 @@ import type { DateRange } from '../common/dates';
 import { Sale } from './sale.schema';
 import type { CustomerSalesStats, SaleWithCustomer, SalesTotals, SeriesBucket } from './sales.interfaces';
 
-const CUSTOMER_FIELDS = 'shopName ownerName phone';
+const CUSTOMER_FIELDS = 'ownerName phone';
 const EMPTY_TOTALS: SalesTotals = { count: 0, weightGrams: 0, totalAmountPaise: 0, totalPaidPaise: 0, remainingPaise: 0 };
 
 const totalsGroup = {

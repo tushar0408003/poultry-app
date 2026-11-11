@@ -20,13 +20,13 @@ export function StatusBadge({ status }: { status: PaymentStatus }) {
   );
 }
 
-/** One sale in a list: shop, date, weight x rate, total, received, balance. */
+/** One sale in a list: customer, date, weight x rate, total, received, balance. */
 export function SaleRow({ sale, onPress, showCustomer = true }: { sale: Sale; onPress: () => void; showCustomer?: boolean }) {
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.surface }]}>
       <View style={styles.rowTop}>
         <Text style={styles.rowTitle} numberOfLines={1}>
-          {showCustomer ? (sale.customer?.shopName ?? 'Unknown shop') : formatDateShort(sale.saleDate)}
+          {showCustomer ? (sale.customer?.ownerName ?? 'Unknown customer') : formatDateShort(sale.saleDate)}
         </Text>
         <Text style={styles.amount}>{formatINR(sale.totalAmount)}</Text>
       </View>
@@ -69,7 +69,7 @@ export function PaymentRow({
       </View>
       <View style={{ flex: 1 }}>
         <Text style={styles.rowTitle} numberOfLines={1}>
-          {showCustomer ? (payment.customer?.shopName ?? 'Unknown shop') : online ? 'Online' : 'Cash'}
+          {showCustomer ? (payment.customer?.ownerName ?? 'Unknown customer') : online ? 'Online' : 'Cash'}
         </Text>
         <Text style={styles.sub}>
           {formatDateShort(payment.paymentDate)}
