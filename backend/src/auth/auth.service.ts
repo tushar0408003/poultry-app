@@ -58,7 +58,7 @@ export class AuthService implements OnModuleInit {
   }
 
   private sign(user: User): Promise<string> {
-    const payload: JwtPayload = { sub: user._id.toString(), username: user.username, ver: user.tokenVersion };
+    const payload: JwtPayload = { sub: user._id.toString(), ver: user.tokenVersion };
     return this.jwt.signAsync(payload);
   }
 }
