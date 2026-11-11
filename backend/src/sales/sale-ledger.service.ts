@@ -7,10 +7,10 @@ import type { SaleTotals } from './sales.interfaces';
 export function computeTotals(totalAmountPaise: number, cashPaise: number, onlinePaise: number): SaleTotals {
   const totalPaidPaise = cashPaise + onlinePaise;
   return {
-    cashPaidPaise: cashPaise,
-    onlinePaidPaise: onlinePaise,
-    totalPaidPaise,
-    remainingPaise: totalAmountPaise - totalPaidPaise,
+    cashPaid: cashPaise,
+    onlinePaid: onlinePaise,
+    totalPaid: totalPaidPaise,
+    remaining: totalAmountPaise - totalPaidPaise,
   };
 }
 
@@ -28,7 +28,7 @@ export class SaleLedger {
   async sync(saleId: Types.ObjectId, totalAmountPaise: number, session?: ClientSession): Promise<SaleTotals> {
     const { cashPaise, onlinePaise } = await this.payments.totalsForSale(saleId, session);
     const totals = computeTotals(totalAmountPaise, cashPaise, onlinePaise);
-    if (totals.remainingPaise < 0) {
+    if (totals.remaining < 0) {
       // Services validate before writing; reaching this means a concurrent change slipped in.
       // Throwing aborts the transaction so the overpayment is never committed.
       throw new ConflictException('The balance changed while saving. Please refresh and try again.');

@@ -8,7 +8,7 @@ import { Button, Card, Divider, ErrorState, Loading, Row, SectionTitle } from '.
 import type { RootScreenProps } from '../navigation/types';
 import { colors, font, spacing } from '../theme';
 import { formatDate } from '../utils/dates';
-import { formatINR, formatKg } from '../utils/money';
+import { formatINR, formatKg, paiseToINR, saleDuePaise, salePaidPaise, saleRatePerKg } from '../utils/money';
 
 export function SaleDetailScreen({ route, navigation }: RootScreenProps<'SaleDetail'>) {
   const { id } = route.params;
@@ -24,7 +24,7 @@ export function SaleDetailScreen({ route, navigation }: RootScreenProps<'SaleDet
     Alert.alert(
       'Delete this sale?',
       `${formatINR(sale.totalAmount)} sale to ${sale.customer?.ownerName ?? 'customer'} on ${formatDate(sale.saleDate)}.` +
-        (n > 0 ? `\n\nIts ${n} payment record${n === 1 ? '' : 's'} (${formatINR(sale.totalPaid)}) will also be deleted.` : '') +
+        (n > 0 ? `\n\nIts ${n} payment record${n === 1 ? '' : 's'} (${paiseToINR(salePaidPaise(sale))}) will also be deleted.` : '') +
         '\n\nThis cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
@@ -76,16 +76,16 @@ export function SaleDetailScreen({ route, navigation }: RootScreenProps<'SaleDet
 
       <Card>
         <Row label="Weight" value={formatKg(sale.weight)} />
-        <Row label="Rate per kg" value={formatINR(sale.ratePerKg)} />
+        <Row label="Rate per kg" value={formatINR(saleRatePerKg(sale))} />
         <Row label="Total amount" value={formatINR(sale.totalAmount)} color={colors.sales} bold />
         <Divider />
         <Row label="Cash received" value={formatINR(sale.cashReceived)} color={colors.received} />
         <Row label="Online received" value={formatINR(sale.onlineReceived)} color={colors.received} />
-        <Row label="Total received" value={formatINR(sale.totalPaid)} color={colors.received} bold />
+        <Row label="Total received" value={paiseToINR(salePaidPaise(sale))} color={colors.received} bold />
         <Row
           label="Remaining balance"
-          value={formatINR(sale.remainingBalance)}
-          color={sale.remainingBalance > 0 ? colors.due : colors.received}
+          value={paiseToINR(saleDuePaise(sale))}
+          color={saleDuePaise(sale) > 0 ? colors.due : colors.received}
           bold
         />
         {sale.notes ? (
@@ -96,7 +96,7 @@ export function SaleDetailScreen({ route, navigation }: RootScreenProps<'SaleDet
         ) : null}
       </Card>
 
-      {sale.remainingBalance > 0 && (
+      {saleDuePaise(sale) > 0 && (
         <Button
           title="Add payment"
           variant="success"

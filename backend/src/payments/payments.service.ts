@@ -44,10 +44,10 @@ export class PaymentsService {
           `Payment date cannot be before the sale date (${formatDateOnly(sale.saleDate)})`,
         );
       }
-      if (sale.remainingPaise <= 0) throw new BadRequestException('This sale is already fully paid');
-      if (amountPaise > sale.remainingPaise) {
+      if (sale.remaining <= 0) throw new BadRequestException('This sale is already fully paid');
+      if (amountPaise > sale.remaining) {
         throw new BadRequestException(
-          `Amount (${formatInr(amountPaise)}) is more than the balance due (${formatInr(sale.remainingPaise)})`,
+          `Amount (${formatInr(amountPaise)}) is more than the balance due (${formatInr(sale.remaining)})`,
         );
       }
       const [payment] = await this.payments.insertMany(
@@ -76,7 +76,7 @@ export class PaymentsService {
       );
       const [paid] = await this.payments.customerPaymentStats([customerId], session);
       const outstandingDue = (customer.outstandingPaise ?? 0) - (paid ? paid.cashPaise + paid.onlinePaise : 0);
-      const due = outstandingDue + open.reduce((sum, s) => sum + s.remainingPaise, 0);
+      const due = outstandingDue + open.reduce((sum, s) => sum + s.remaining, 0);
       if (due === 0) throw new BadRequestException('This customer has no balance due on or before this date');
       if (amountPaise > due) {
         throw new BadRequestException(
@@ -96,7 +96,7 @@ export class PaymentsService {
       }
       for (const sale of open) {
         if (left === 0) break;
-        const part = Math.min(left, sale.remainingPaise);
+        const part = Math.min(left, sale.remaining);
         docs.push(this.newPayment(dto, sale._id, customerId, part, paymentDate));
         left -= part;
       }

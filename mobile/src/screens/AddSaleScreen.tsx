@@ -6,7 +6,7 @@ import { Banner } from '../components/ui';
 import { SaleForm } from '../forms/SaleForm';
 import { SaleFormValues, toSaleInput } from '../forms/saleSchema';
 import { todayString } from '../utils/dates';
-import { formatINR } from '../utils/money';
+import { formatINR, paiseToINR, saleDuePaise } from '../utils/money';
 
 const empty = (): SaleFormValues => ({
   customer: null,
@@ -31,7 +31,7 @@ export function AddSaleScreen() {
       setBanner({
         tone: 'success',
         message: `Saved: ${formatINR(sale.totalAmount)} to ${sale.customer?.ownerName ?? 'customer'}` +
-          (sale.remainingBalance > 0 ? ` · Due ${formatINR(sale.remainingBalance)}` : ' · Fully paid'),
+          (saleDuePaise(sale) > 0 ? ` · Due ${paiseToINR(saleDuePaise(sale))}` : ' · Fully paid'),
       });
       return true;
     } catch (e) {

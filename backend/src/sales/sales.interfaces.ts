@@ -5,10 +5,10 @@ import type { Types } from 'mongoose';
 import type { PaymentResponse } from '../payments/payments.interfaces';
 
 export interface SaleTotals {
-  cashPaidPaise: number;
-  onlinePaidPaise: number;
-  totalPaidPaise: number;
-  remainingPaise: number;
+  cashPaid: number;
+  onlinePaid: number;
+  totalPaid: number;
+  remaining: number;
 }
 
 export interface CustomerSummary {
@@ -23,16 +23,11 @@ export interface SaleResponse {
   customer: CustomerSummary | null;
   saleDate: string;
   weight: number;
-  ratePerKg: number;
   totalAmount: number;
   cashReceived: number;
   onlineReceived: number;
-  totalPaid: number;
-  remainingBalance: number;
   status: PaymentStatus;
   notes: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export type CustomerRef = Pick<Customer, '_id' | 'ownerName' | 'phone'>;
@@ -41,10 +36,10 @@ export type SaleWithCustomer = Omit<Sale, 'customerId'> & { customerId: Customer
 
 export interface SalesTotals {
   count: number;
-  weightGrams: number;
-  totalAmountPaise: number;
-  totalPaidPaise: number;
-  remainingPaise: number;
+  weight: number;
+  totalAmount: number;
+  totalPaid: number;
+  remaining: number;
 }
 
 export interface CustomerSalesStats extends SalesTotals {

@@ -7,7 +7,7 @@ const intValidator = { validator: Number.isSafeInteger, message: '{PATH} must be
 /**
  * One sale. All money is in integer PAISE, weight in integer GRAMS (see common/money.ts).
  *
- * cashPaidPaise / onlinePaidPaise / totalPaidPaise / remainingPaise are a cache
+ * cashPaid / onlinePaid / totalPaid / remaining (paise, despite the names) are a cache
  * derived from the `payments` collection (the source of truth). They are
  * recalculated inside the same transaction as every payment change.
  */
@@ -32,16 +32,16 @@ export class Sale {
   totalAmountPaise: number;
 
   @Prop({ required: true, min: 0, default: 0, validate: intValidator })
-  cashPaidPaise: number;
+  cashPaid: number;
 
   @Prop({ required: true, min: 0, default: 0, validate: intValidator })
-  onlinePaidPaise: number;
+  onlinePaid: number;
 
   @Prop({ required: true, min: 0, default: 0, validate: intValidator })
-  totalPaidPaise: number;
+  totalPaid: number;
 
   @Prop({ required: true, min: 0, validate: intValidator })
-  remainingPaise: number;
+  remaining: number;
 
   @Prop({ trim: true, default: '', maxlength: 500 })
   notes: string;
@@ -54,4 +54,4 @@ export type SaleDocument = HydratedDocument<Sale>;
 export const SaleSchema = SchemaFactory.createForClass(Sale);
 SaleSchema.index({ customerId: 1, saleDate: -1 });
 SaleSchema.index({ saleDate: -1, createdAt: -1 });
-SaleSchema.index({ remainingPaise: 1 });
+SaleSchema.index({ remaining: 1 });

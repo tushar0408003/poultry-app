@@ -96,9 +96,9 @@ export class SalesService {
       filter.saleDate = range;
     }
 
-    if (query.status === 'PAID') filter.remainingPaise = 0;
-    if (query.status === 'UNPAID') Object.assign(filter, { totalPaidPaise: 0, remainingPaise: { $gt: 0 } });
-    if (query.status === 'PARTIAL') Object.assign(filter, { totalPaidPaise: { $gt: 0 }, remainingPaise: { $gt: 0 } });
+    if (query.status === 'PAID') filter.remaining = 0;
+    if (query.status === 'UNPAID') Object.assign(filter, { totalPaid: 0, remaining: { $gt: 0 } });
+    if (query.status === 'PARTIAL') Object.assign(filter, { totalPaid: { $gt: 0 }, remaining: { $gt: 0 } });
 
     const [items, total] = await this.sales.list(filter, query.page, query.limit);
     return paginated(items.map(toSaleResponse), total, query.page, query.limit);

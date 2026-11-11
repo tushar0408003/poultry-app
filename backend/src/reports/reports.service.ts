@@ -65,10 +65,10 @@ export class ReportsService {
       to: formatDateOnly(lastDayOf(range)),
       sales: {
         count: sales.count,
-        totalWeight: gramsToKg(sales.weightGrams),
-        totalAmount: paiseToRupees(sales.totalAmountPaise),
-        paidSoFar: paiseToRupees(sales.totalPaidPaise),
-        stillUnpaid: paiseToRupees(sales.remainingPaise),
+        totalWeight: gramsToKg(sales.weight),
+        totalAmount: paiseToRupees(sales.totalAmount),
+        paidSoFar: paiseToRupees(sales.totalPaid),
+        stillUnpaid: paiseToRupees(sales.remaining),
       },
       collections: {
         count: collections.count,

@@ -22,15 +22,10 @@ export function toSaleResponse(sale: Sale | SaleWithCustomer): SaleResponse {
     customer: toCustomerSummary(ref),
     saleDate: formatDateOnly(sale.saleDate),
     weight: gramsToKg(sale.weightGrams),
-    ratePerKg: paiseToRupees(sale.ratePaise),
     totalAmount: paiseToRupees(sale.totalAmountPaise),
-    cashReceived: paiseToRupees(sale.cashPaidPaise),
-    onlineReceived: paiseToRupees(sale.onlinePaidPaise),
-    totalPaid: paiseToRupees(sale.totalPaidPaise),
-    remainingBalance: paiseToRupees(sale.remainingPaise),
-    status: paymentStatus(sale.totalAmountPaise, sale.totalPaidPaise),
+    cashReceived: paiseToRupees(sale.cashPaid),
+    onlineReceived: paiseToRupees(sale.onlinePaid),
+    status: paymentStatus(sale.totalAmountPaise, sale.totalPaid),
     notes: sale.notes ?? '',
-    createdAt: sale.createdAt,
-    updatedAt: sale.updatedAt,
   };
 }

@@ -1,4 +1,4 @@
-import { formatINR, formatKg, parseDecimal, saleAmountPaise, toGrams, toPaise } from '../money';
+import { formatINR, formatKg, parseDecimal, saleAmountPaise, saleDuePaise, salePaidPaise, saleRatePerKg, toGrams, toPaise } from '../money';
 
 describe('money (client)', () => {
   it('parses decimal strings exactly', () => {
@@ -31,5 +31,17 @@ describe('money (client)', () => {
     expect(formatKg(50)).toBe('50 kg');
     expect(formatKg(1250.5)).toBe('1,250.5 kg');
     expect(formatKg(0.125)).toBe('0.125 kg');
+  });
+});
+
+describe('derived sale amounts', () => {
+  const sale = { weight: 12.345, totalAmount: 2468.88, cashReceived: 1000.1, onlineReceived: 200.2 };
+  it('derives paid / due exactly in paise', () => {
+    expect(salePaidPaise(sale)).toBe(120030);
+    expect(saleDuePaise(sale)).toBe(126858);
+  });
+  it('recovers the rate from total / weight', () => {
+    expect(saleRatePerKg(sale)).toBe(199.99);
+    expect(saleRatePerKg({ ...sale, weight: 0 })).toBe(0);
   });
 });

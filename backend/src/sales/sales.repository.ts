@@ -6,14 +6,14 @@ import { Sale } from './sale.schema';
 import type { CustomerSalesStats, SaleWithCustomer, SalesTotals, SeriesBucket } from './sales.interfaces';
 
 const CUSTOMER_FIELDS = 'ownerName phone';
-const EMPTY_TOTALS: SalesTotals = { count: 0, weightGrams: 0, totalAmountPaise: 0, totalPaidPaise: 0, remainingPaise: 0 };
+const EMPTY_TOTALS: SalesTotals = { count: 0, weight: 0, totalAmount: 0, totalPaid: 0, remaining: 0 };
 
 const totalsGroup = {
   count: { $sum: 1 },
-  weightGrams: { $sum: '$weightGrams' },
-  totalAmountPaise: { $sum: '$totalAmountPaise' },
-  totalPaidPaise: { $sum: '$totalPaidPaise' },
-  remainingPaise: { $sum: '$remainingPaise' },
+  weight: { $sum: '$weightGrams' },
+  totalAmount: { $sum: '$totalAmountPaise' },
+  totalPaid: { $sum: '$totalPaid' },
+  remaining: { $sum: '$remaining' },
 };
 
 @Injectable()
@@ -56,7 +56,7 @@ export class SalesRepository {
   /** Outstanding sales of a customer, oldest first (for FIFO payment allocation). */
   findOutstandingForCustomer(customerId: Types.ObjectId, session?: ClientSession): Promise<Sale[]> {
     return this.model
-      .find({ customerId, remainingPaise: { $gt: 0 } })
+      .find({ customerId, remaining: { $gt: 0 } })
       .sort({ saleDate: 1, createdAt: 1, _id: 1 })
       .session(session ?? null)
       .lean<Sale[]>()
@@ -84,8 +84,8 @@ export class SalesRepository {
         $group: {
           _id: '$customerId',
           ...totalsGroup,
-          cashPaidPaise: { $sum: '$cashPaidPaise' },
-          onlinePaidPaise: { $sum: '$onlinePaidPaise' },
+          cashPaidPaise: { $sum: '$cashPaid' },
+          onlinePaidPaise: { $sum: '$onlinePaid' },
           lastSaleDate: { $max: '$saleDate' },
         },
       },
@@ -111,8 +111,8 @@ export class SalesRepository {
   async currentOutstanding(): Promise<{ remainingPaise: number; customers: number; sales: number }> {
     const [row] = await this.model
       .aggregate<{ remainingPaise: number; customers: number; sales: number }>([
-        { $match: { remainingPaise: { $gt: 0 } } },
-        { $group: { _id: null, remainingPaise: { $sum: '$remainingPaise' }, sales: { $sum: 1 }, c: { $addToSet: '$customerId' } } },
+        { $match: { remaining: { $gt: 0 } } },
+        { $group: { _id: null, remainingPaise: { $sum: '$remaining' }, sales: { $sum: 1 }, c: { $addToSet: '$customerId' } } },
         { $project: { _id: 0, remainingPaise: 1, sales: 1, customers: { $size: '$c' } } },
       ])
       .exec();

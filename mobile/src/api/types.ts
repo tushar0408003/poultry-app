@@ -63,16 +63,11 @@ export interface Sale {
   customer: CustomerSummary | null;
   saleDate: string;
   weight: number;
-  ratePerKg: number;
   totalAmount: number;
   cashReceived: number;
   onlineReceived: number;
-  totalPaid: number;
-  remainingBalance: number;
   status: PaymentStatus;
   notes: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface SaleDetail extends Sale {

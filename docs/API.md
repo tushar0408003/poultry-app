@@ -42,13 +42,13 @@ Rules: weight > 0, rate > 0, payments ≥ 0, cash + online ≤ total, no future 
 
 Response (also returned by GET/PATCH `/sales/:id`):
 ```json
-{ "id": "…", "customerId": "…", "customer": { "id": "…", "shopName": "…", "ownerName": "", "phone": "" },
-  "saleDate": "2026-11-03", "weight": 50, "ratePerKg": 200, "totalAmount": 10000,
-  "cashReceived": 2000, "onlineReceived": 3000, "totalPaid": 5000, "remainingBalance": 5000,
-  "status": "PARTIAL", "notes": "", "createdAt": "…", "updatedAt": "…",
+{ "id": "…", "customerId": "…", "customer": { "id": "…", "ownerName": "…", "phone": "" },
+  "saleDate": "2026-11-03", "weight": 50, "totalAmount": 10000,
+  "cashReceived": 2000, "onlineReceived": 3000,
+  "status": "PARTIAL", "notes": "",
   "payments": [ { "id": "…", "amount": 2000, "paymentMode": "CASH", "paymentDate": "2026-11-03", "source": "SALE_ENTRY", … } ] }
 ```
-`cashReceived` / `onlineReceived` / `totalPaid` include all payments for the sale, later ones too.
+`cashReceived` / `onlineReceived` include all payments for the sale, later ones too. Paid = cash + online; due = `totalAmount` − paid.
 
 | Method | Path | Notes |
 |---|---|---|

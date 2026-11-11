@@ -8,7 +8,7 @@ import { PaymentForm } from '../forms/PaymentForm';
 import type { RootScreenProps } from '../navigation/types';
 import { colors, font, spacing } from '../theme';
 import { formatDate } from '../utils/dates';
-import { formatINR } from '../utils/money';
+import { formatINR, saleDuePaise } from '../utils/money';
 
 /** Records a later payment against one sale. */
 export function AddPaymentScreen({ route, navigation }: RootScreenProps<'AddPayment'>) {
@@ -26,7 +26,7 @@ export function AddPaymentScreen({ route, navigation }: RootScreenProps<'AddPaym
         {sale.customer?.ownerName} · {formatDate(sale.saleDate)} · Sale {formatINR(sale.totalAmount)}
       </Text>
       <PaymentForm
-        duePaise={Math.round(sale.remainingBalance * 100)}
+        duePaise={saleDuePaise(sale)}
         minimumDate={sale.saleDate}
         submitError={submitError}
         onSubmit={async (input) => {

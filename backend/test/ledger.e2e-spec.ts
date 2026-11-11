@@ -103,8 +103,6 @@ describe('Supplier ledger (e2e)', () => {
         totalAmount: 10000,
         cashReceived: 2000,
         onlineReceived: 3000,
-        totalPaid: 5000,
-        remainingBalance: 5000,
         status: 'PARTIAL',
         saleDate: '2026-10-01',
       });
@@ -120,7 +118,7 @@ describe('Supplier ledger (e2e)', () => {
         paymentMode: 'CASH',
         paymentDate: '2026-10-04',
       }).expect(201);
-      expect(res.body.sale).toMatchObject({ totalPaid: 7000, remainingBalance: 3000, cashReceived: 4000 });
+      expect(res.body.sale).toMatchObject({ cashReceived: 4000, onlineReceived: 3000, status: 'PARTIAL' });
 
       const history = await get(`/payments/${saleId}`).expect(200);
       expect(history.body.map((p: { amount: number }) => p.amount)).toEqual([2000, 3000, 2000]);
@@ -208,7 +206,7 @@ describe('Supplier ledger (e2e)', () => {
   describe('editing a sale recalculates the balance safely', () => {
     it('recalculates when the weight changes', async () => {
       const res = await patch(`/sales/${saleId}`, { weight: 40 }).expect(200);
-      expect(res.body).toMatchObject({ totalAmount: 8000, totalPaid: 7000, remainingBalance: 1000 });
+      expect(res.body).toMatchObject({ totalAmount: 8000, cashReceived: 4000, onlineReceived: 3000, status: 'PARTIAL' });
     });
 
     it('refuses a new total below what has already been paid', async () => {
@@ -231,7 +229,7 @@ describe('Supplier ledger (e2e)', () => {
 
     it('replaces the cash received at sale time without touching later collections', async () => {
       const res = await patch(`/sales/${saleId}`, { cashReceived: 0 }).expect(200);
-      expect(res.body).toMatchObject({ cashReceived: 2000, onlineReceived: 3000, totalPaid: 5000, remainingBalance: 3000 });
+      expect(res.body).toMatchObject({ totalAmount: 8000, cashReceived: 2000, onlineReceived: 3000, status: 'PARTIAL' });
       expect(res.body.payments).toHaveLength(2);
     });
 
@@ -256,7 +254,7 @@ describe('Supplier ledger (e2e)', () => {
       const res = await post('/payments/allocate', { customerId: shopA, amount: 4000, paymentMode: 'ONLINE', paymentDate: '2026-10-11' }).expect(201);
       expect(res.body.payments.map((p: { amount: number }) => p.amount)).toEqual([3000, 1000]);
       expect((await get(`/sales/${saleId}`)).body.status).toBe('PAID');
-      expect((await get(`/sales/${second}`)).body.remainingBalance).toBe(500);
+      expect((await get(`/sales/${second}`)).body).toSatisfy((s: { totalAmount: number; cashReceived: number; onlineReceived: number }) => s.totalAmount - s.cashReceived - s.onlineReceived === 500);
     });
 
     it('does not allocate to sales dated after the payment', async () => {
@@ -275,7 +273,7 @@ describe('Supplier ledger (e2e)', () => {
     it('deleting a wrong payment restores the balance', async () => {
       const history = (await get(`/payments/${second}`)).body;
       const res = await del(`/payments/${history[0].id}`).expect(200);
-      expect(res.body.sale).toMatchObject({ remainingBalance: 1500, status: 'UNPAID' });
+      expect(res.body.sale).toMatchObject({ cashReceived: 0, onlineReceived: 0, status: 'UNPAID' });
     });
 
     it('deleting a sale removes its payments and updates outstanding', async () => {
@@ -321,7 +319,7 @@ describe('Supplier ledger (e2e)', () => {
       expect(results.filter((r) => r.status === 201)).toHaveLength(3);
       expect(results.filter((r) => r.status === 400)).toHaveLength(3);
       const sale = (await get(`/sales/${id}`)).body;
-      expect(sale).toMatchObject({ totalPaid: 3000, remainingBalance: 0, status: 'PAID' });
+      expect(sale).toMatchObject({ cashReceived: 3000, onlineReceived: 0, status: 'PAID' });
       expect(sale.payments).toHaveLength(3);
       await del(`/sales/${id}`).expect(200);
     });

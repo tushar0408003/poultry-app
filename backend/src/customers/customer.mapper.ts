@@ -10,14 +10,14 @@ export function toCustomerStats(
   stats?: CustomerSalesStats,
   payments?: CustomerPaymentStats,
 ): CustomerStatsResponse {
-  const totalPaise = outstandingPaise + (stats?.totalAmountPaise ?? 0);
+  const totalPaise = outstandingPaise + (stats?.totalAmount ?? 0);
   // Sale caches cover sale payments; `payments` adds the ones against outstanding.
   const onlinePaise = (stats?.onlinePaidPaise ?? 0) + (payments?.onlinePaise ?? 0);
   const offlinePaise = (stats?.cashPaidPaise ?? 0) + (payments?.cashPaise ?? 0);
   return {
     salesCount: stats?.count ?? 0,
-    weight: gramsToKg(stats?.weightGrams ?? 0),
-    sales: paiseToRupees(stats?.totalAmountPaise ?? 0),
+    weight: gramsToKg(stats?.weight ?? 0),
+    sales: paiseToRupees(stats?.totalAmount ?? 0),
     total: paiseToRupees(totalPaise),
     onlinePayment: paiseToRupees(onlinePaise),
     offlinePayment: paiseToRupees(offlinePaise),
