@@ -7,7 +7,7 @@ export interface CustomerStatsResponse {
   onlinePayment: number;
   offlinePayment: number;
   /** total - (onlinePayment + offlinePayment) */
-  outstandingBalance: number;
+  outstandingBalance: number
   lastPaymentDate: string | null;
 }
 
