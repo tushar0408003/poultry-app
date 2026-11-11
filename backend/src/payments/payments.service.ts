@@ -68,12 +68,15 @@ export class PaymentsService {
     const paymentDate = this.paymentDate(dto.paymentDate);
 
     const ids = await this.tx.run(async (session) => {
-      if (!(await this.customers.findById(customerId, session))) throw new NotFoundException('Customer not found');
+      const customer = await this.customers.findById(customerId, session);
+      if (!customer) throw new NotFoundException('Customer not found');
       // Only sales made on or before the payment date can receive it.
       const open = (await this.sales.findOutstandingForCustomer(customerId, session)).filter(
         (s) => s.saleDate <= paymentDate,
       );
-      const due = open.reduce((sum, s) => sum + s.remainingPaise, 0);
+      const [paid] = await this.payments.customerPaymentStats([customerId], session);
+      const outstandingDue = (customer.outstandingPaise ?? 0) - (paid ? paid.cashPaise + paid.onlinePaise : 0);
+      const due = outstandingDue + open.reduce((sum, s) => sum + s.remainingPaise, 0);
       if (due === 0) throw new BadRequestException('This customer has no balance due on or before this date');
       if (amountPaise > due) {
         throw new BadRequestException(
@@ -83,6 +86,14 @@ export class PaymentsService {
 
       const docs: Omit<Payment, '_id' | 'createdAt'>[] = [];
       let left = amountPaise;
+      // Outstanding is the oldest debt, so it is paid first.
+      // shortcut: no document is written for it, so two simultaneous collections could both pay it; add a
+      // paid-amount cache on the customer (like sales have) if concurrent collection becomes real.
+      if (outstandingDue > 0) {
+        const part = Math.min(left, outstandingDue);
+        docs.push(this.newPayment(dto, null, customerId, part, paymentDate));
+        left -= part;
+      }
       for (const sale of open) {
         if (left === 0) break;
         const part = Math.min(left, sale.remainingPaise);
@@ -90,7 +101,7 @@ export class PaymentsService {
         left -= part;
       }
       const created = await this.payments.insertMany(docs, session);
-      for (const sale of open.slice(0, docs.length)) {
+      for (const sale of open.filter((s) => docs.some((d) => d.saleId?.equals(s._id)))) {
         await this.ledger.sync(sale._id, sale.totalAmountPaise, session);
       }
       return created.map((p) => p._id);
@@ -103,16 +114,17 @@ export class PaymentsService {
     };
   }
 
-  /** Removes a wrongly entered payment and restores the sale's balance. */
-  async remove(id: Types.ObjectId): Promise<{ deleted: true; sale: SaleResponse }> {
+  /** Removes a wrongly entered payment and restores the sale's (or outstanding) balance. */
+  async remove(id: Types.ObjectId): Promise<{ deleted: true; sale: SaleResponse | null }> {
     const saleId = await this.tx.run(async (session: ClientSession | undefined) => {
       const payment = await this.payments.findById(id, session);
       if (!payment) throw new NotFoundException('Payment not found');
-      const sale = await this.sales.findById(payment.saleId, session);
+      const sale = payment.saleId ? await this.sales.findById(payment.saleId, session) : null;
       await this.payments.deleteById(id, session);
       if (sale) await this.ledger.sync(sale._id, sale.totalAmountPaise, session);
       return payment.saleId;
     });
+    if (!saleId) return { deleted: true, sale: null };
     const sale = await this.sales.findByIdWithCustomer(saleId);
     if (!sale) throw new NotFoundException('Sale not found');
     return { deleted: true, sale: toSaleResponse(sale) };
@@ -154,7 +166,7 @@ export class PaymentsService {
 
   private newPayment(
     dto: CreatePaymentDto | AllocatePaymentDto,
-    saleId: Types.ObjectId,
+    saleId: Types.ObjectId | null,
     customerId: Types.ObjectId,
     amountPaise: number,
     paymentDate: Date,
@@ -173,7 +185,7 @@ export class PaymentsService {
   private async paymentWithSale(paymentId: Types.ObjectId): Promise<{ payment: PaymentResponse; sale: SaleResponse }> {
     const payment = await this.payments.findById(paymentId);
     if (!payment) throw new NotFoundException('Payment not found');
-    const sale = await this.sales.findByIdWithCustomer(payment.saleId);
+    const sale = payment.saleId ? await this.sales.findByIdWithCustomer(payment.saleId) : null;
     if (!sale) throw new NotFoundException('Sale not found');
     return { payment: toPaymentResponse(payment), sale: toSaleResponse(sale) };
   }

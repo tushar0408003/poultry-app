@@ -1,10 +1,14 @@
 export interface CustomerStatsResponse {
   salesCount: number;
-  totalWeight: number;
-  totalSales: number;
-  totalPaid: number;
+  weight: number;
+  sales: number;
+  /** outstanding + sales */
+  total: number;
+  onlinePayment: number;
+  offlinePayment: number;
+  /** total - (onlinePayment + offlinePayment) */
   outstandingBalance: number;
-  lastSaleDate: string | null;
+  lastPaymentDate: string | null;
 }
 
 export interface CustomerResponse {
@@ -13,6 +17,7 @@ export interface CustomerResponse {
   ownerName: string;
   phone: string;
   address: string;
+  outstanding: number;
   createdAt: Date;
   updatedAt: Date;
   stats: CustomerStatsResponse;

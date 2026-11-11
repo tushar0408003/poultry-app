@@ -11,7 +11,7 @@ export function toPaymentResponse(p: Payment | PaymentWithCustomer): PaymentResp
   const customerId = !ref ? '' : ref instanceof Types.ObjectId ? ref.toString() : ref._id.toString();
   return {
     id: p._id.toString(),
-    saleId: p.saleId.toString(),
+    saleId: p.saleId?.toString() ?? null,
     customerId,
     customer: toCustomerSummary(ref),
     amount: paiseToRupees(p.amountPaise),

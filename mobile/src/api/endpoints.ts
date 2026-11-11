@@ -52,7 +52,7 @@ export const paymentsApi = {
   bySale: (saleId: string) => api.get<Payment[]>(`/payments/${saleId}`).then((r) => r.data),
   byCustomer: (customerId: string, page = 1) =>
     api.get<Paginated<Payment>>(`/payments/customer/${customerId}`, { params: { page, limit: 20 } }).then((r) => r.data),
-  remove: (id: string) => api.delete<{ deleted: true; sale: Sale }>(`/payments/${id}`).then((r) => r.data),
+  remove: (id: string) => api.delete<{ deleted: true; sale: Sale | null }>(`/payments/${id}`).then((r) => r.data),
 };
 
 export const reportsApi = {

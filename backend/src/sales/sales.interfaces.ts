@@ -50,6 +50,8 @@ export interface SalesTotals {
 
 export interface CustomerSalesStats extends SalesTotals {
   customerId: Types.ObjectId;
+  cashPaidPaise: number;
+  onlinePaidPaise: number;
   lastSaleDate: Date | null;
 }
 

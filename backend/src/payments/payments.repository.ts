@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import type { ClientSession, Model, QueryFilter, Types } from 'mongoose';
 import type { DateRange } from '../common/dates';
 import { Payment, PaymentMode, PaymentSource } from './payment.schema';
-import type { CollectionBucket, CollectionTotals, PaymentWithCustomer } from './payments.interfaces';
+import type { CollectionBucket, CollectionTotals, CustomerPaymentStats, PaymentWithCustomer } from './payments.interfaces';
 
 const byMode = (mode: PaymentMode) => ({ $sum: { $cond: [{ $eq: ['$paymentMode', mode] }, '$amountPaise', 0] } });
 
@@ -56,6 +56,31 @@ export class PaymentsRepository {
       .session(session ?? null)
       .exec();
     return { cashPaise: row?.cashPaise ?? 0, onlinePaise: row?.onlinePaise ?? 0 };
+  }
+
+  /** Per customer: payments against outstanding (no sale) by mode, and the latest payment date. */
+  customerPaymentStats(customerIds: Types.ObjectId[], session?: ClientSession): Promise<CustomerPaymentStats[]> {
+    const againstOutstanding = (mode: PaymentMode) => ({
+      $sum: { $cond: [{ $and: [{ $eq: ['$saleId', null] }, { $eq: ['$paymentMode', mode] }] }, '$amountPaise', 0] },
+    });
+    return this.model
+      .aggregate<CustomerPaymentStats>([
+        { $match: { customerId: { $in: customerIds } } },
+        {
+          $group: {
+            _id: '$customerId',
+            cashPaise: againstOutstanding(PaymentMode.CASH),
+            onlinePaise: againstOutstanding(PaymentMode.ONLINE),
+            lastPaymentDate: { $max: '$paymentDate' },
+          },
+        },
+      ])
+      .session(session ?? null)
+      .exec();
+  }
+
+  async existsForCustomer(customerId: Types.ObjectId): Promise<boolean> {
+    return (await this.model.exists({ customerId })) !== null;
   }
 
   async deleteById(id: Types.ObjectId, session?: ClientSession): Promise<void> {

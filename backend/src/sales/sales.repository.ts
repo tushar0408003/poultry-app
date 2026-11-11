@@ -80,7 +80,15 @@ export class SalesRepository {
     const pipeline: PipelineStage[] = [];
     if (customerIds) pipeline.push({ $match: { customerId: { $in: customerIds } } });
     pipeline.push(
-      { $group: { _id: '$customerId', ...totalsGroup, lastSaleDate: { $max: '$saleDate' } } },
+      {
+        $group: {
+          _id: '$customerId',
+          ...totalsGroup,
+          cashPaidPaise: { $sum: '$cashPaidPaise' },
+          onlinePaidPaise: { $sum: '$onlinePaidPaise' },
+          lastSaleDate: { $max: '$saleDate' },
+        },
+      },
       { $addFields: { customerId: '$_id' } },
       { $project: { _id: 0 } },
     );
