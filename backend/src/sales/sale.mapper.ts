@@ -1,33 +1,8 @@
 import { Types } from 'mongoose';
 import { formatDateOnly } from '../common/dates';
-import { gramsToKg, paiseToRupees, PaymentStatus, paymentStatus } from '../common/money';
+import { gramsToKg, paiseToRupees, paymentStatus } from '../common/money';
 import type { Sale } from './sale.schema';
-import type { CustomerRef, SaleWithCustomer } from './sales.repository';
-
-export interface CustomerSummary {
-  id: string;
-  shopName: string;
-  ownerName: string;
-  phone: string;
-}
-
-export interface SaleResponse {
-  id: string;
-  customerId: string;
-  customer: CustomerSummary | null;
-  saleDate: string;
-  weight: number;
-  ratePerKg: number;
-  totalAmount: number;
-  cashReceived: number;
-  onlineReceived: number;
-  totalPaid: number;
-  remainingBalance: number;
-  status: PaymentStatus;
-  notes: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import type { CustomerRef, CustomerSummary, SaleResponse, SaleWithCustomer } from './sales.interfaces';
 
 export function toCustomerSummary(ref: CustomerRef | Types.ObjectId | null): CustomerSummary | null {
   if (!ref || ref instanceof Types.ObjectId || !('shopName' in ref)) return null;

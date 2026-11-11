@@ -1,29 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { BusinessClock } from '../common/business-clock.service';
 import { dayRange, formatDateOnly, monthRange, parseDateOnly, weekRange } from '../common/dates';
-import { PaymentResponse, toPaymentResponse } from '../payments/payment.mapper';
+import { toPaymentResponse } from '../payments/payment.mapper';
 import { PaymentsRepository } from '../payments/payments.repository';
-import { CurrentOutstanding, PeriodSummary, ReportsService } from '../reports/reports.service';
-import { SaleResponse, toSaleResponse } from '../sales/sale.mapper';
+import { ReportsService } from '../reports/reports.service';
+import { toSaleResponse } from '../sales/sale.mapper';
 import { SalesRepository } from '../sales/sales.repository';
-
-export interface DashboardSummary {
-  date: string;
-  isToday: boolean;
-  day: {
-    totalWeight: number;
-    totalSales: number;
-    salesCount: number;
-    cashReceived: number;
-    onlineReceived: number;
-    totalReceived: number;
-  };
-  currentOutstanding: CurrentOutstanding;
-  week: PeriodSummary;
-  month: PeriodSummary;
-  recentSales: SaleResponse[];
-  recentPayments: PaymentResponse[];
-}
+import type { DashboardSummary } from './dashboard.interfaces';
 
 @Injectable()
 export class DashboardService {

@@ -5,17 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import { Model, Types } from 'mongoose';
 import { User } from './user.schema';
-
-export interface JwtPayload {
-  sub: string;
-  username: string;
-  ver: number;
-}
-
-export interface AuthUser {
-  id: string;
-  username: string;
-}
+import type { AuthUser, JwtPayload } from './auth.interfaces';
 
 const BCRYPT_ROUNDS = 12;
 // Compared against when the username does not exist, so response time does not reveal valid usernames.

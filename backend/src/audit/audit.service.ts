@@ -3,28 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import type { ClientSession, Model, QueryFilter, Types } from 'mongoose';
 import { paginated, Paginated } from '../common/pagination.dto';
 import { RequestContext } from '../common/request-context';
-import { AuditAction, AuditEntity, AuditLog } from './audit-log.schema';
-
-export interface AuditEntry {
-  entity: AuditEntity;
-  entityId: Types.ObjectId;
-  action: AuditAction;
-  before?: object | null;
-  after?: object | null;
-}
-
-export interface AuditLogResponse {
-  id: string;
-  entity: AuditEntity;
-  entityId: string;
-  action: AuditAction;
-  before: Record<string, unknown> | null;
-  after: Record<string, unknown> | null;
-  /** Fields whose stored value differs between before and after. */
-  changedFields: string[];
-  username: string;
-  at: Date;
-}
+import { AuditEntity, AuditLog } from './audit-log.schema';
+import type { AuditEntry, AuditLogResponse } from './audit.interfaces';
 
 const IGNORED = new Set(['_id', '__v', 'createdAt', 'updatedAt']);
 

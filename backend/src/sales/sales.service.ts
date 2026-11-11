@@ -6,16 +6,15 @@ import { computeSaleAmount, formatInr, kgToGrams, rupeesToPaise } from '../commo
 import { paginated, Paginated } from '../common/pagination.dto';
 import { CustomersRepository } from '../customers/customers.repository';
 import { TransactionService } from '../database/transaction.service';
-import { PaymentResponse, toPaymentResponse } from '../payments/payment.mapper';
+import { toPaymentResponse } from '../payments/payment.mapper';
 import { Payment, PaymentMode, PaymentSource } from '../payments/payment.schema';
 import { PaymentsRepository } from '../payments/payments.repository';
 import { CreateSaleDto, ListSalesQueryDto, UpdateSaleDto } from './dto/sale.dto';
 import { computeTotals, SaleLedger } from './sale-ledger.service';
-import { SaleResponse, toSaleResponse } from './sale.mapper';
+import { toSaleResponse } from './sale.mapper';
 import { Sale } from './sale.schema';
 import { SalesRepository } from './sales.repository';
-
-export type SaleDetailResponse = SaleResponse & { payments: PaymentResponse[] };
+import type { SaleDetailResponse, SaleResponse } from './sales.interfaces';
 
 @Injectable()
 export class SalesService {

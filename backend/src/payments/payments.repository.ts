@@ -2,22 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { ClientSession, Model, QueryFilter, Types } from 'mongoose';
 import type { DateRange } from '../common/dates';
-import type { CustomerRef } from '../sales/sales.repository';
 import { Payment, PaymentMode, PaymentSource } from './payment.schema';
-
-export type PaymentWithCustomer = Omit<Payment, 'customerId'> & { customerId: CustomerRef | null };
-
-export interface CollectionTotals {
-  count: number;
-  cashPaise: number;
-  onlinePaise: number;
-}
-
-export interface CollectionBucket {
-  _id: string;
-  cashPaise: number;
-  onlinePaise: number;
-}
+import type { CollectionBucket, CollectionTotals, PaymentWithCustomer } from './payments.interfaces';
 
 const byMode = (mode: PaymentMode) => ({ $sum: { $cond: [{ $eq: ['$paymentMode', mode] }, '$amountPaise', 0] } });
 

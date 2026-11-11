@@ -2,9 +2,10 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { Types } from 'mongoose';
 import { SalesRepository } from '../sales/sales.repository';
 import { normaliseShopName } from './customer.schema';
-import { CustomerResponse, toCustomerResponse } from './customer.mapper';
+import { toCustomerResponse } from './customer.mapper';
 import { CustomersRepository } from './customers.repository';
 import { CreateCustomerDto, UpdateCustomerDto } from './dto/customer.dto';
+import type { CustomerResponse } from './customers.interfaces';
 
 @Injectable()
 export class CustomersService {

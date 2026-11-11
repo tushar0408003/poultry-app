@@ -1,9 +1,10 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { Public } from '../common/decorators/public.decorator';
-import { AuthService, AuthUser } from './auth.service';
+import { AuthService } from './auth.service';
 import { ChangePasswordDto, LoginDto } from './dto/auth.dto';
 import { CurrentUser } from './jwt-auth.guard';
+import type { AuthUser } from './auth.interfaces';
 
 @Controller('auth')
 export class AuthController {

@@ -1,27 +1,8 @@
 import { gramsToKg, paiseToRupees } from '../common/money';
-import type { CustomerSalesStats } from '../sales/sales.repository';
 import { formatDateOnly } from '../common/dates';
 import type { Customer } from './customer.schema';
-
-export interface CustomerStatsResponse {
-  salesCount: number;
-  totalWeight: number;
-  totalSales: number;
-  totalPaid: number;
-  outstandingBalance: number;
-  lastSaleDate: string | null;
-}
-
-export interface CustomerResponse {
-  id: string;
-  shopName: string;
-  ownerName: string;
-  phone: string;
-  address: string;
-  createdAt: Date;
-  updatedAt: Date;
-  stats: CustomerStatsResponse;
-}
+import type { CustomerSalesStats } from '../sales/sales.interfaces';
+import type { CustomerResponse, CustomerStatsResponse } from './customers.interfaces';
 
 export function toCustomerStats(stats?: CustomerSalesStats): CustomerStatsResponse {
   return {

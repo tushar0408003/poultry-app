@@ -4,7 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import type { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../common/decorators/public.decorator';
 import { RequestContext } from '../common/request-context';
-import { AuthService, AuthUser, JwtPayload } from './auth.service';
+import { AuthService } from './auth.service';
+import type { AuthUser, JwtPayload } from './auth.interfaces';
 
 type AuthedRequest = Request & { user?: AuthUser };
 

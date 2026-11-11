@@ -7,12 +7,14 @@ import { paginated, Paginated, PaginationQueryDto } from '../common/pagination.d
 import { CustomersRepository } from '../customers/customers.repository';
 import { TransactionService } from '../database/transaction.service';
 import { SaleLedger } from '../sales/sale-ledger.service';
-import { SaleResponse, toSaleResponse } from '../sales/sale.mapper';
+import { toSaleResponse } from '../sales/sale.mapper';
 import { SalesRepository } from '../sales/sales.repository';
 import { AllocatePaymentDto, CreatePaymentDto, ListPaymentsQueryDto } from './dto/payment.dto';
-import { PaymentResponse, toPaymentResponse } from './payment.mapper';
+import { toPaymentResponse } from './payment.mapper';
 import { Payment, PaymentSource } from './payment.schema';
 import { PaymentsRepository } from './payments.repository';
+import type { SaleResponse } from '../sales/sales.interfaces';
+import type { PaymentResponse } from './payments.interfaces';
 
 @Injectable()
 export class PaymentsService {
