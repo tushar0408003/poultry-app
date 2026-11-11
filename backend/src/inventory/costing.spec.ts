@@ -1,4 +1,5 @@
-import { applyMovement, divRound, EMPTY_STOCK, InventoryType, MovementInput, replay } from './costing';
+import { applyMovement, divRound, EMPTY_STOCK, InventoryType, replay } from './costing';
+import type { MovementInput } from './inventory.interfaces';
 
 const buy = (kg: number, rupeesPerKg: number): MovementInput => ({
   type: InventoryType.PURCHASE_IN,

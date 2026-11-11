@@ -1,3 +1,5 @@
+import type { MovementInput, MovementResult, StockState } from './inventory.interfaces';
+
 /**
  * Weighted-average inventory costing (pure functions, no I/O).
  *
@@ -28,31 +30,7 @@ export const TYPE_ORDER: Record<InventoryType, number> = {
   [InventoryType.STOCK_COUNT]: 4,
 };
 
-export interface StockState {
-  balanceGrams: number;
-  balanceValuePaise: number;
-  /** Last known average cost, paise per kg. 0 = no purchase yet. */
-  avgRatePaisePerKg: number;
-}
-
 export const EMPTY_STOCK: StockState = { balanceGrams: 0, balanceValuePaise: 0, avgRatePaisePerKg: 0 };
-
-export interface MovementInput {
-  type: InventoryType;
-  /** PURCHASE_IN: received weight. SALE_OUT: sold weight. LOSS: lost weight. */
-  quantityGrams?: number;
-  /** PURCHASE_IN only: total purchase amount. */
-  amountPaise?: number;
-  /** STOCK_COUNT only: physically counted stock. */
-  countedGrams?: number;
-}
-
-export interface MovementResult extends StockState {
-  /** Signed change in stock quantity. */
-  deltaGrams: number;
-  /** Signed change in stock value. For SALE_OUT, −valuePaise is the cost of goods sold. */
-  valuePaise: number;
-}
 
 /** Signed integer division rounded half away from zero. */
 export function divRound(numerator: bigint, denominator: bigint): bigint {

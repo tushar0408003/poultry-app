@@ -7,13 +7,7 @@ import { paiseToRupees, rupeesToPaise } from '../common/money';
 import { TransactionService } from '../database/transaction.service';
 import { UpdateSettingsDto } from './dto/settings.dto';
 import { Settings, SETTINGS_KEY } from './settings.schema';
-
-export interface SettingsResponse {
-  businessName: string;
-  defaultPurchaseRate: number;
-  defaultSaleRate: number;
-  updatedAt: Date | null;
-}
+import type { SettingsResponse } from './settings.interfaces';
 
 @Injectable()
 export class SettingsService {

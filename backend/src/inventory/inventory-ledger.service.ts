@@ -1,18 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { AnyBulkWriteOperation, ClientSession, Model, Types } from 'mongoose';
-import { EMPTY_STOCK, InventoryType, MovementInput, replay, StockState, TYPE_ORDER } from './costing';
+import { EMPTY_STOCK, replay, TYPE_ORDER } from './costing';
 import { InventoryTransaction } from './inventory-transaction.schema';
-
-export interface MovementData {
-  type: InventoryType;
-  date: Date;
-  sourceId?: Types.ObjectId | null;
-  quantityGrams?: number;
-  amountPaise?: number;
-  countedGrams?: number | null;
-  reason?: string;
-}
+import type { MovementData, MovementInput, StockState } from './inventory.interfaces';
 
 const ORDER = { date: 1, typeOrder: 1, createdAt: 1, _id: 1 } as const;
 

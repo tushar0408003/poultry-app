@@ -1,30 +1,17 @@
 import { Types } from 'mongoose';
 import { formatDateOnly } from '../common/dates';
 import { paiseToRupees } from '../common/money';
-import { CustomerSummary, toCustomerSummary } from '../sales/sale.mapper';
-import type { CustomerRef } from '../sales/sales.repository';
-import type { Payment, PaymentMode, PaymentSource } from './payment.schema';
-import type { PaymentWithCustomer } from './payments.repository';
-
-export interface PaymentResponse {
-  id: string;
-  saleId: string;
-  customerId: string;
-  customer: CustomerSummary | null;
-  amount: number;
-  paymentMode: PaymentMode;
-  paymentDate: string;
-  transactionReference: string;
-  source: PaymentSource;
-  createdAt: Date;
-}
+import { toCustomerSummary } from '../sales/sale.mapper';
+import type { Payment } from './payment.schema';
+import type { CustomerRef } from '../sales/sales.interfaces';
+import type { PaymentResponse, PaymentWithCustomer } from './payments.interfaces';
 
 export function toPaymentResponse(p: Payment | PaymentWithCustomer): PaymentResponse {
   const ref = p.customerId as CustomerRef | Types.ObjectId | null;
   const customerId = !ref ? '' : ref instanceof Types.ObjectId ? ref.toString() : ref._id.toString();
   return {
     id: p._id.toString(),
-    saleId: p.saleId.toString(),
+    saleId: p.saleId?.toString() ?? null,
     customerId,
     customer: toCustomerSummary(ref),
     amount: paiseToRupees(p.amountPaise),

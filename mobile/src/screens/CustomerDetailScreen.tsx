@@ -75,9 +75,11 @@ export function CustomerDetailScreen({ route, navigation }: RootScreenProps<'Cus
 
       <StatGrid>
         <StatCard label="Outstanding balance" value={formatINR(s.outstandingBalance)} tone={s.outstandingBalance > 0 ? 'due' : 'received'} wide />
-        <StatCard label="Total weight purchased" value={formatKg(s.totalWeight)} />
-        <StatCard label="Total sales" value={formatINR(s.totalSales)} tone="sales" footnote={`${s.salesCount} sales`} />
-        <StatCard label="Total paid" value={formatINR(s.totalPaid)} tone="received" wide footnote={s.lastSaleDate ? `Last sale ${formatDate(s.lastSaleDate)}` : undefined} />
+        <StatCard label="Weight" value={formatKg(s.weight)} />
+        <StatCard label="Sales" value={formatINR(s.sales)} tone="sales" footnote={`${s.salesCount} sales`} />
+        <StatCard label="Total" value={formatINR(s.total)} wide footnote={customer.outstanding > 0 ? `Incl. ${formatINR(customer.outstanding)} outstanding` : undefined} />
+        <StatCard label="Online payment" value={formatINR(s.onlinePayment)} tone="received" />
+        <StatCard label="Offline payment" value={formatINR(s.offlinePayment)} tone="received" footnote={s.lastPaymentDate ? `Last payment ${formatDate(s.lastPaymentDate)}` : undefined} />
       </StatGrid>
 
       {s.outstandingBalance > 0 && (

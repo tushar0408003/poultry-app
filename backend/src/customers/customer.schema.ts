@@ -21,6 +21,10 @@ export class Customer {
   @Prop({ trim: true, default: '', maxlength: 300 })
   address: string;
 
+  /** Dues from before the app, integer paise. Added to sales for the customer's total. */
+  @Prop({ min: 0, default: 0, validate: { validator: Number.isSafeInteger } })
+  outstandingPaise: number;
+
   createdAt: Date;
   updatedAt: Date;
 }

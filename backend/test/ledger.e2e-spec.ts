@@ -244,7 +244,7 @@ describe('Supplier ledger (e2e)', () => {
       const a = (await get(`/customers/${shopA}`)).body;
       const b = (await get(`/customers/${shopB}`)).body;
       expect(a.stats.outstandingBalance).toBe(0);
-      expect(b.stats).toMatchObject({ salesCount: 1, totalSales: 8000, totalPaid: 5000, outstandingBalance: 3000 });
+      expect(b.stats).toMatchObject({ salesCount: 1, sales: 8000, total: 8000, offlinePayment: 2000, onlinePayment: 3000, outstandingBalance: 3000 });
       await patch(`/sales/${saleId}`, { customerId: shopA }).expect(200);
     });
   });
@@ -290,6 +290,27 @@ describe('Supplier ledger (e2e)', () => {
       expect(r.body.paymentsDeleted).toBe(3);
       expect((await get(`/payments/customer/${shopA}`)).body.total).toBe(0);
       await get(`/sales/${saleId}`).expect(404);
+    });
+  });
+
+  describe('outstanding', () => {
+    it('is paid before sales and counted in the customer totals', async () => {
+      const c = (await post('/customers', { shopName: 'Old Dues Shop', outstanding: 1000 }).expect(201)).body;
+      expect(c.stats).toMatchObject({ total: 1000, outstandingBalance: 1000 });
+      const s = (await post('/sales', { customerId: c.id, saleDate: '2026-10-12', weight: 10, ratePerKg: 100 }).expect(201)).body.id;
+
+      const res = await post('/payments/allocate', { customerId: c.id, amount: 1500, paymentMode: 'CASH', paymentDate: '2026-10-12' }).expect(201);
+      expect(res.body.payments.map((p: { saleId: string | null; amount: number }) => [p.saleId, p.amount])).toEqual([[null, 1000], [s, 500]]);
+      await post('/payments/allocate', { customerId: c.id, amount: 500.01, paymentMode: 'CASH', paymentDate: '2026-10-12' }).expect(400);
+
+      const after = (await get(`/customers/${c.id}`)).body;
+      expect(after.stats).toMatchObject({ sales: 1000, total: 2000, offlinePayment: 1500, outstandingBalance: 500, lastPaymentDate: '2026-10-12' });
+      await patch(`/customers/${c.id}`, { outstanding: 999 }).expect(400);
+
+      const del1 = await del(`/payments/${res.body.payments[0].id}`).expect(200);
+      expect(del1.body.sale).toBeNull();
+      expect((await get(`/customers/${c.id}`)).body.stats.outstandingBalance).toBe(1500);
+      await del(`/sales/${s}`).expect(200);
     });
   });
 

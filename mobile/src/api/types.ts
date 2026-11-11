@@ -21,15 +21,18 @@ export interface CustomerSummary {
 
 export interface CustomerStats {
   salesCount: number;
-  totalWeight: number;
-  totalSales: number;
-  totalPaid: number;
+  weight: number;
+  sales: number;
+  total: number;
+  onlinePayment: number;
+  offlinePayment: number;
   outstandingBalance: number;
-  lastSaleDate: string | null;
+  lastPaymentDate: string | null;
 }
 
 export interface Customer extends CustomerSummary {
   address: string;
+  outstanding: number;
   createdAt: string;
   updatedAt: string;
   stats: CustomerStats;
@@ -40,11 +43,12 @@ export interface CustomerInput {
   ownerName?: string;
   phone?: string;
   address?: string;
+  outstanding?: number;
 }
 
 export interface Payment {
   id: string;
-  saleId: string;
+  saleId: string | null;
   customerId: string;
   customer: CustomerSummary | null;
   amount: number;

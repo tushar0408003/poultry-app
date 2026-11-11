@@ -2,30 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { ClientSession, Model, PipelineStage, QueryFilter, Types } from 'mongoose';
 import type { DateRange } from '../common/dates';
-import { Customer } from '../customers/customer.schema';
 import { Sale } from './sale.schema';
-
-export type CustomerRef = Pick<Customer, '_id' | 'shopName' | 'ownerName' | 'phone'>;
-export type SaleWithCustomer = Omit<Sale, 'customerId'> & { customerId: CustomerRef | null };
-
-export interface SalesTotals {
-  count: number;
-  weightGrams: number;
-  totalAmountPaise: number;
-  totalPaidPaise: number;
-  remainingPaise: number;
-}
-
-export interface CustomerSalesStats extends SalesTotals {
-  customerId: Types.ObjectId;
-  lastSaleDate: Date | null;
-}
-
-export interface SeriesBucket {
-  _id: string;
-  weightGrams: number;
-  totalAmountPaise: number;
-}
+import type { CustomerSalesStats, SaleWithCustomer, SalesTotals, SeriesBucket } from './sales.interfaces';
 
 const CUSTOMER_FIELDS = 'shopName ownerName phone';
 const EMPTY_TOTALS: SalesTotals = { count: 0, weightGrams: 0, totalAmountPaise: 0, totalPaidPaise: 0, remainingPaise: 0 };
@@ -102,7 +80,15 @@ export class SalesRepository {
     const pipeline: PipelineStage[] = [];
     if (customerIds) pipeline.push({ $match: { customerId: { $in: customerIds } } });
     pipeline.push(
-      { $group: { _id: '$customerId', ...totalsGroup, lastSaleDate: { $max: '$saleDate' } } },
+      {
+        $group: {
+          _id: '$customerId',
+          ...totalsGroup,
+          cashPaidPaise: { $sum: '$cashPaidPaise' },
+          onlinePaidPaise: { $sum: '$onlinePaidPaise' },
+          lastSaleDate: { $max: '$saleDate' },
+        },
+      },
       { $addFields: { customerId: '$_id' } },
       { $project: { _id: 0 } },
     );

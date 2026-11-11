@@ -2,13 +2,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import type { ClientSession, Types } from 'mongoose';
 import { PaymentsRepository } from '../payments/payments.repository';
 import { SalesRepository } from './sales.repository';
-
-export interface SaleTotals {
-  cashPaidPaise: number;
-  onlinePaidPaise: number;
-  totalPaidPaise: number;
-  remainingPaise: number;
-}
+import type { SaleTotals } from './sales.interfaces';
 
 export function computeTotals(totalAmountPaise: number, cashPaise: number, onlinePaise: number): SaleTotals {
   const totalPaidPaise = cashPaise + onlinePaise;

@@ -22,8 +22,9 @@ export enum PaymentSource {
 export class Payment {
   _id: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: Sale.name, required: true })
-  saleId: Types.ObjectId;
+  /** null = paid against the customer's outstanding, not a sale. */
+  @Prop({ type: Types.ObjectId, ref: Sale.name, default: null })
+  saleId: Types.ObjectId | null;
 
   @Prop({ type: Types.ObjectId, ref: Customer.name, required: true })
   customerId: Types.ObjectId;

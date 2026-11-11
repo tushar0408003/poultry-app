@@ -10,8 +10,8 @@ import { colors, font, spacing } from '../theme';
 import { formatINR } from '../utils/money';
 
 /**
- * Receive a lump-sum payment from a customer. The server applies it to their
- * oldest unpaid sales first and creates one payment record per sale.
+ * Receive a lump-sum payment from a customer. The server applies it to the
+ * outstanding, then the oldest unpaid sales, with one payment record per target.
  */
 export function CollectPaymentScreen({ route, navigation }: RootScreenProps<'CollectPayment'>) {
   const { customerId } = route.params;
@@ -25,7 +25,7 @@ export function CollectPaymentScreen({ route, navigation }: RootScreenProps<'Col
   return (
     <Screen>
       <Text style={styles.shop}>{customer.shopName}</Text>
-      <Text style={styles.hint}>The payment is applied to the oldest unpaid sales first.</Text>
+      <Text style={styles.hint}>The payment clears the outstanding first, then the oldest unpaid sales.</Text>
       <PaymentForm
         duePaise={Math.round(customer.stats.outstandingBalance * 100)}
         submitError={submitError}
@@ -34,8 +34,9 @@ export function CollectPaymentScreen({ route, navigation }: RootScreenProps<'Col
           setSubmitError(undefined);
           try {
             const res = await allocate.mutateAsync(input);
-            const n = res.payments.length;
-            Alert.alert('Payment saved', `${formatINR(res.totalAllocated)} applied to ${n} sale${n === 1 ? '' : 's'}.`);
+            const n = res.payments.filter((p) => p.saleId).length;
+            const old = res.payments.length > n ? ' and the outstanding' : '';
+            Alert.alert('Payment saved', `${formatINR(res.totalAllocated)} applied to ${n} sale${n === 1 ? '' : 's'}${old}.`);
             navigation.goBack();
           } catch (e) {
             setSubmitError(errorMessage(e));

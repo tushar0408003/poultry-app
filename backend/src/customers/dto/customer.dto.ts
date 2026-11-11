@@ -1,5 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { Transform } from 'class-transformer';
+import { IsRupees } from '../../common/validators';
 import { IsNotEmpty, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 
 const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
@@ -29,6 +30,11 @@ export class CreateCustomerDto {
   @IsString()
   @MaxLength(300)
   address?: string;
+
+  /** Dues carried over from before the app, in rupees. */
+  @IsOptional()
+  @IsRupees(0)
+  outstanding?: number;
 }
 
 export class UpdateCustomerDto extends PartialType(CreateCustomerDto) {}
