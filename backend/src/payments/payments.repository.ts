@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { ClientSession, Model, QueryFilter, Types } from 'mongoose';
 import type { DateRange } from '../common/dates';
+import { paiseOf } from '../common/money';
 import { Payment, PaymentMode, PaymentSource } from './payment.schema';
 import type { CollectionBucket, CollectionTotals, CustomerPaymentStats, PaymentWithCustomer } from './payments.interfaces';
 
-const byMode = (mode: PaymentMode) => ({ $sum: { $cond: [{ $eq: ['$paymentMode', mode] }, '$amountPaise', 0] } });
+const byMode = (mode: PaymentMode) => ({ $sum: { $cond: [{ $eq: ['$paymentMode', mode] }, paiseOf('$amount'), 0] } });
 
 @Injectable()
 export class PaymentsRepository {
@@ -47,7 +48,7 @@ export class PaymentsRepository {
   }
 
   /** Recomputes cash/online totals of a sale from its payment records. */
-  async totalsForSale(saleId: Types.ObjectId, session?: ClientSession): Promise<{ cashPaise: number; onlinePaise: number }> {
+  async totalsForSale(saleId: Types.ObjectId, session?: ClientSession): Promise<{   cashPaise: number; onlinePaise: number }> {
     const [row] = await this.model
       .aggregate<{ cashPaise: number; onlinePaise: number }>([
         { $match: { saleId } },
@@ -61,7 +62,7 @@ export class PaymentsRepository {
   /** Per customer: payments against outstanding (no sale) by mode, and the latest payment date. */
   customerPaymentStats(customerIds: Types.ObjectId[], session?: ClientSession): Promise<CustomerPaymentStats[]> {
     const againstOutstanding = (mode: PaymentMode) => ({
-      $sum: { $cond: [{ $and: [{ $eq: ['$saleId', null] }, { $eq: ['$paymentMode', mode] }] }, '$amountPaise', 0] },
+      $sum: { $cond: [{ $and: [{ $eq: ['$saleId', null] }, { $eq: ['$paymentMode', mode] }] }, paiseOf('$amount'), 0] },
     });
     return this.model
       .aggregate<CustomerPaymentStats>([

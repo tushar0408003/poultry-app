@@ -15,7 +15,7 @@ docs/      API reference
 ## 1. Design decisions (read this first)
 
 ### Money is stored as integer paise, weight as integer grams
-`₹200.50` is stored as `20050` (sale weight is stored in kg as entered). Integers are exact in
+`₹200.50` is stored as `20050` (sales store kg and rupees as entered; their math is done in paise). Integers are exact in
 JavaScript and in MongoDB `$sum`, so totals never drift (no `0.1 + 0.2` errors).
 The sale total is entered directly (there is no per-kg rate). Input is
 parsed from its decimal *string*, never `x * 100`. The API itself speaks plain
@@ -85,12 +85,12 @@ customers 1 ──< sales 1 ──< payments
 | Collection | Fields | Indexes |
 |---|---|---|
 | `customers` | shopName, shopNameKey (normalised, **unique**), ownerName, phone, address, createdAt, updatedAt | shopNameKey, shopName |
-| `sales` | customerId, saleDate, weight (kg, double), totalAmountPaise, cashPaid, onlinePaid, totalPaid, remaining (all paise), notes, createdAt, updatedAt | {customerId, saleDate}, {saleDate, createdAt}, remaining |
-| `payments` | saleId, customerId, amountPaise, paymentMode (CASH/ONLINE), paymentDate, transactionReference, source (SALE_ENTRY/COLLECTION), createdAt | saleId, {customerId, paymentDate}, {paymentDate, createdAt} |
+| `sales` | customerId, saleDate, weight (kg), totalAmount, cashPaid, onlinePaid, totalPaid, remaining (all rupees), notes, createdAt, updatedAt | {customerId, saleDate}, {saleDate, createdAt}, remaining |
+| `payments` | saleId, customerId, amount (rupees), paymentMode (CASH/ONLINE), paymentDate, transactionReference, source (SALE_ENTRY/COLLECTION), createdAt | saleId, {customerId, paymentDate}, {paymentDate, createdAt} |
 | `users` | username (unique), passwordHash (bcrypt, 12 rounds), tokenVersion | username |
 
 Invariant, enforced in code and covered by tests:
-`sale.totalPaidPaise = Σ payments.amountPaise` and `remainingPaise = totalAmountPaise − totalPaidPaise ≥ 0`.
+`sale.totalPaid = Σ payments.amount` and `remaining = totalAmount − totalPaid ≥ 0` (computed in paise, stored in rupees).
 
 ---
 

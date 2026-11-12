@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import { formatDateOnly } from '../common/dates';
-import { paiseToRupees, paymentStatus } from '../common/money';
+import { paymentStatus } from '../common/money';
 import type { Sale } from './sale.schema';
 import type { CustomerRef, CustomerSummary, SaleResponse, SaleWithCustomer } from './sales.interfaces';
 
@@ -22,10 +22,10 @@ export function toSaleResponse(sale: Sale | SaleWithCustomer): SaleResponse {
     customer: toCustomerSummary(ref),
     saleDate: formatDateOnly(sale.saleDate),
     weight: sale.weight,
-    totalAmount: paiseToRupees(sale.totalAmountPaise),
-    cashReceived: paiseToRupees(sale.cashPaid),
-    onlineReceived: paiseToRupees(sale.onlinePaid),
-    status: paymentStatus(sale.totalAmountPaise, sale.totalPaid),
+    totalAmount: sale.totalAmount,
+    cashReceived: sale.cashPaid,
+    onlineReceived: sale.onlinePaid,
+    status: paymentStatus(sale.totalAmount, sale.totalPaid),
     notes: sale.notes ?? '',
   };
 }

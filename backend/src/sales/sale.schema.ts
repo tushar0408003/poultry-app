@@ -2,12 +2,12 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import { Customer } from '../customers/customer.schema';
 
-const intValidator = { validator: Number.isSafeInteger, message: '{PATH} must be an integer' };
-
 /**
- * One sale. All money is in integer PAISE (see common/money.ts); weight is in kg.
+ * One sale, stored as entered: weight in kg, money in rupees (up to 2 decimals).
+ * Arithmetic on these is done in integer paise (sale-ledger.service.ts), so a
+ * fully paid sale has remaining exactly 0, never 1e-17.
  *
- * cashPaid / onlinePaid / totalPaid / remaining (paise, despite the names) are a cache
+ * cashPaid / onlinePaid / totalPaid / remaining are a cache
  * derived from the `payments` collection (the source of truth). They are
  * recalculated inside the same transaction as every payment change.
  */
@@ -27,19 +27,19 @@ export class Sale {
   weight: number;
 
   /** Entered by the user (total price); there is no per-kg rate. */
-  @Prop({ required: true, min: 1, validate: intValidator })
-  totalAmountPaise: number;
+  @Prop({ required: true, min: 0.01 })
+  totalAmount: number;
 
-  @Prop({ required: true, min: 0, default: 0, validate: intValidator })
+  @Prop({ required: true, min: 0, default: 0 })
   cashPaid: number;
 
-  @Prop({ required: true, min: 0, default: 0, validate: intValidator })
+  @Prop({ required: true, min: 0, default: 0 })
   onlinePaid: number;
 
-  @Prop({ required: true, min: 0, default: 0, validate: intValidator })
+  @Prop({ required: true, min: 0, default: 0 })
   totalPaid: number;
 
-  @Prop({ required: true, min: 0, validate: intValidator })
+  @Prop({ required: true, min: 0 })
   remaining: number;
 
   @Prop({ trim: true, default: '', maxlength: 500 })

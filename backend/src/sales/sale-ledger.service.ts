@@ -1,16 +1,18 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import type { ClientSession, Types } from 'mongoose';
+import { paiseToRupees, rupeesToPaise } from '../common/money';
 import { PaymentsRepository } from '../payments/payments.repository';
 import { SalesRepository } from './sales.repository';
 import type { SaleTotals } from './sales.interfaces';
 
+/** Takes integer paise (exact math), returns rupees (the stored unit). */
 export function computeTotals(totalAmountPaise: number, cashPaise: number, onlinePaise: number): SaleTotals {
   const totalPaidPaise = cashPaise + onlinePaise;
   return {
-    cashPaid: cashPaise,
-    onlinePaid: onlinePaise,
-    totalPaid: totalPaidPaise,
-    remaining: totalAmountPaise - totalPaidPaise,
+    cashPaid: paiseToRupees(cashPaise),
+    onlinePaid: paiseToRupees(onlinePaise),
+    totalPaid: paiseToRupees(totalPaidPaise),
+    remaining: paiseToRupees(totalAmountPaise - totalPaidPaise),
   };
 }
 
@@ -25,9 +27,10 @@ export class SaleLedger {
     private readonly payments: PaymentsRepository,
   ) {}
 
-  async sync(saleId: Types.ObjectId, totalAmountPaise: number, session?: ClientSession): Promise<SaleTotals> {
+  /** totalAmount is the sale's stored total, in rupees. */
+  async sync(saleId: Types.ObjectId, totalAmount: number, session?: ClientSession): Promise<SaleTotals> {
     const { cashPaise, onlinePaise } = await this.payments.totalsForSale(saleId, session);
-    const totals = computeTotals(totalAmountPaise, cashPaise, onlinePaise);
+    const totals = computeTotals(rupeesToPaise(totalAmount), cashPaise, onlinePaise);
     if (totals.remaining < 0) {
       // Services validate before writing; reaching this means a concurrent change slipped in.
       // Throwing aborts the transaction so the overpayment is never committed.

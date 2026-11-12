@@ -4,6 +4,7 @@ import type { Payment, PaymentStatus, Sale } from '../api/types';
 import { colors, font, radius, spacing } from '../theme';
 import { formatDateShort } from '../utils/dates';
 import { formatINR, formatKg, paiseToINR, saleDuePaise } from '../utils/money';
+import { IconButton } from './ui';
 
 const STATUS_STYLE: Record<PaymentStatus, { fg: string; bg: string; label: string }> = {
   PAID: { fg: colors.received, bg: colors.receivedBg, label: 'Paid' },
@@ -21,7 +22,17 @@ export function StatusBadge({ status }: { status: PaymentStatus }) {
 }
 
 /** One sale in a list: customer, date, weight x rate, total, received, balance. */
-export function SaleRow({ sale, onPress, showCustomer = true }: { sale: Sale; onPress: () => void; showCustomer?: boolean }) {
+export function SaleRow({
+  sale,
+  onPress,
+  onEdit,
+  showCustomer = true,
+}: {
+  sale: Sale;
+  onPress: () => void;
+  onEdit?: () => void;
+  showCustomer?: boolean;
+}) {
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.surface }]}>
       <View style={styles.rowTop}>
@@ -31,10 +42,13 @@ export function SaleRow({ sale, onPress, showCustomer = true }: { sale: Sale; on
         <Text style={styles.amount}>{formatINR(sale.totalAmount)}</Text>
       </View>
       <View style={styles.rowTop}>
-        <Text style={styles.sub}>
-          {showCustomer ? `${formatDateShort(sale.saleDate)} · ` : ''}
-          {formatKg(sale.weight)}
-        </Text>
+        <View style={styles.weightLine}>
+          <Text style={styles.sub}>
+            {showCustomer ? `${formatDateShort(sale.saleDate)} · ` : ''}
+            {formatKg(sale.weight)}
+          </Text>
+          {onEdit && <IconButton icon="create-outline" label="Edit sale" color={colors.primary} onPress={onEdit} />}
+        </View>
         <StatusBadge status={sale.status} />
       </View>
       <View style={styles.money}>
@@ -96,6 +110,7 @@ const styles = StyleSheet.create({
   rowTitle: { fontSize: font.body + 1, fontWeight: '700', color: colors.text, flex: 1, marginRight: spacing.sm },
   amount: { fontSize: font.body + 1, fontWeight: '700', color: colors.text },
   sub: { fontSize: font.small, color: colors.textMuted, flex: 1 },
+  weightLine: { flex: 1, flexDirection: 'row', alignItems: 'center' },
   money: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 },
   moneyText: { fontSize: font.small, color: colors.textMuted },
   green: { color: colors.received, fontWeight: '700' },

@@ -36,12 +36,12 @@ export class SalesService {
     const saleDate = dto.saleDate ? parseDateOnly(dto.saleDate) : this.clock.today();
     this.assertNotFuture(saleDate, 'Sale date');
 
-    // All in integer grams / paise, the units the sale is stored in.
+    // Stored as entered (kg, rupees); compared in integer paise so the check is exact.
     const weight = dto.weight;
-    const totalAmount = toPaise(dto.totalAmount);
+    const totalAmount = dto.totalAmount;
     const cashReceived = toPaise(dto.cashReceived ?? 0);
     const onlineReceived = toPaise(dto.onlineReceived ?? 0);
-    assertNotOverpaid(cashReceived + onlineReceived, totalAmount);
+    assertNotOverpaid(cashReceived + onlineReceived, toPaise(totalAmount));
 
     const saleId = await this.tx.run(async (session) => {
       if (!(await this.customers.findById(customerId, session))) throw new NotFoundException('Customer not found');
@@ -50,8 +50,8 @@ export class SalesService {
           customerId,
           saleDate,
           weight,
-          totalAmountPaise: totalAmount,
-          ...computeTotals(totalAmount, cashReceived, onlineReceived),
+          totalAmount,
+          ...computeTotals(toPaise(totalAmount), cashReceived, onlineReceived),
           notes: dto.notes ?? '',
         },
         session,
@@ -128,7 +128,7 @@ export class SalesService {
       if (dateChanged) this.assertNotFuture(saleDate, 'Sale date');
 
       const weight = dto.weight ?? sale.weight;
-      const totalAmountPaise = dto.totalAmount !== undefined ? toPaise(dto.totalAmount) : sale.totalAmountPaise;
+      const totalAmount = dto.totalAmount ?? sale.totalAmount;
 
       const replace = {
         [PaymentMode.CASH]: dto.cashReceived !== undefined ? toPaise(dto.cashReceived) : undefined,
@@ -148,10 +148,10 @@ export class SalesService {
       let paidAfter = 0;
       for (const p of existing) {
         const replaced = p.source === PaymentSource.SALE_ENTRY && replace[p.paymentMode] !== undefined;
-        if (!replaced) paidAfter += p.amountPaise;
+        if (!replaced) paidAfter += toPaise(p.amount);
       }
       paidAfter += (replace.CASH ?? 0) + (replace.ONLINE ?? 0);
-      assertNotOverpaid(paidAfter, totalAmountPaise);
+      assertNotOverpaid(paidAfter, toPaise(totalAmount));
 
       // --- validated, now write ---
       if (customerChanged) await this.payments.reassignCustomer(id, customerId, session);
@@ -173,12 +173,12 @@ export class SalesService {
           customerId,
           saleDate,
           weight,
-          totalAmountPaise,
+          totalAmount,
           ...(dto.notes !== undefined && { notes: dto.notes }),
         },
         session,
       );
-      await this.ledger.sync(id, totalAmountPaise, session);
+      await this.ledger.sync(id, totalAmount, session);
     });
     return this.get(id);
   }
@@ -218,7 +218,7 @@ function saleEntryPayment(
     {
       saleId: sale._id,
       customerId: sale.customerId,
-      amountPaise,
+      amount: amountPaise / PAISE_PER_RUPEE,
       paymentMode: mode,
       paymentDate: sale.saleDate,
       transactionReference: mode === PaymentMode.ONLINE ? (reference ?? '') : '',
@@ -227,6 +227,6 @@ function saleEntryPayment(
   ];
 }
 
-// The DTO validator allows at most 2 decimals and caps the size,
+// For exact money math only (nothing is stored in paise). Inputs have at most 2 decimals and a capped size,
 // so rounding the scaled float is exact; round() only removes float noise (1.15 * 100 = 114.999...).
 const toPaise = (rupees: number) => Math.round(rupees * PAISE_PER_RUPEE);

@@ -29,9 +29,9 @@ export class Payment {
   @Prop({ type: Types.ObjectId, ref: Customer.name, required: true })
   customerId: Types.ObjectId;
 
-  /** Integer paise, always > 0. */
-  @Prop({ required: true, min: 1, validate: { validator: Number.isSafeInteger } })
-  amountPaise: number;
+  /** Rupees as entered (up to 2 decimals), always > 0. Summed via paiseOf() for exact totals. */
+  @Prop({ required: true, min: 0.01 })
+  amount: number;
 
   @Prop({ required: true, enum: PaymentMode, type: String })
   paymentMode: PaymentMode;

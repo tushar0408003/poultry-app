@@ -53,6 +53,9 @@ export const kgToGrams = (v: number | string) => parseDecimal(v, 3);
 export const paiseToRupees = (paise: number): number => paise / PAISE_PER_RUPEE;
 export const gramsToKg = (grams: number): number => grams / GRAMS_PER_KG;
 
+/** Mongo expression: a stored rupee field -> integer paise, so $sum over it is exact (no 0.1 + 0.2 drift). */
+export const paiseOf = (field: string) => ({ $round: [{ $multiply: [field, PAISE_PER_RUPEE] }, 0] });
+
 /** "₹12,34,567.5" style formatting for error messages. */
 export function formatInr(paise: number): string {
   return `₹${(paise / PAISE_PER_RUPEE).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;

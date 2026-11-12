@@ -110,7 +110,13 @@ export function CustomerDetailScreen({ route, navigation }: RootScreenProps<'Cus
             <EmptyState message="No sales yet." />
           ) : (
             saleItems.map((sale) => (
-              <SaleRow key={sale.id} sale={sale} showCustomer={false} onPress={() => navigation.navigate('SaleDetail', { id: sale.id })} />
+              <SaleRow
+                key={sale.id}
+                sale={sale}
+                showCustomer={false}
+                onPress={() => navigation.navigate('SaleDetail', { id: sale.id })}
+                onEdit={() => navigation.navigate('EditSale', { id: sale.id })}
+              />
             ))
           )
         ) : paymentItems.length === 0 ? (

@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../auth/AuthContext';
 import { Loading } from '../components/ui';
 import { AddPaymentScreen } from '../screens/AddPaymentScreen';
@@ -30,13 +31,15 @@ const TAB_ICONS: Record<keyof TabParamList, keyof typeof Ionicons.glyphMap> = {
 };
 
 function MainTabs() {
+  // A fixed tabBar height drops the system nav-bar inset, so add it back.
+  const { bottom } = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: { fontSize: 13, fontWeight: '600' },
-        tabBarStyle: { height: 64, paddingTop: 6 },
+        tabBarStyle: { height: 64 + bottom, paddingTop: 6, paddingBottom: bottom },
         headerTitleStyle: { fontSize: 20, fontWeight: '700' },
         headerShadowVisible: false,
         tabBarIcon: ({ color, focused }) => (

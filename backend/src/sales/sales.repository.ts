@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { ClientSession, Model, PipelineStage, QueryFilter, Types } from 'mongoose';
 import type { DateRange } from '../common/dates';
+import { paiseOf as paise } from '../common/money';
 import { Sale } from './sale.schema';
 import type { CustomerSalesStats, SaleWithCustomer, SalesTotals, SeriesBucket } from './sales.interfaces';
 
@@ -11,9 +12,9 @@ const EMPTY_TOTALS: SalesTotals = { count: 0, weight: 0, totalAmount: 0, totalPa
 const totalsGroup = {
   count: { $sum: 1 },
   weight: { $sum: '$weight' },
-  totalAmount: { $sum: '$totalAmountPaise' },
-  totalPaid: { $sum: '$totalPaid' },
-  remaining: { $sum: '$remaining' },
+  totalAmount: { $sum: paise('$totalAmount') },
+  totalPaid: { $sum: paise('$totalPaid') },
+  remaining: { $sum: paise('$remaining') },
 };
 
 @Injectable()
@@ -84,8 +85,8 @@ export class SalesRepository {
         $group: {
           _id: '$customerId',
           ...totalsGroup,
-          cashPaidPaise: { $sum: '$cashPaid' },
-          onlinePaidPaise: { $sum: '$onlinePaid' },
+          cashPaidPaise: { $sum: paise('$cashPaid') },
+          onlinePaidPaise: { $sum: paise('$onlinePaid') },
           lastSaleDate: { $max: '$saleDate' },
         },
       },
@@ -112,7 +113,7 @@ export class SalesRepository {
     const [row] = await this.model
       .aggregate<{ remainingPaise: number; customers: number; sales: number }>([
         { $match: { remaining: { $gt: 0 } } },
-        { $group: { _id: null, remainingPaise: { $sum: '$remaining' }, sales: { $sum: 1 }, c: { $addToSet: '$customerId' } } },
+        { $group: { _id: null, remainingPaise: { $sum: paise('$remaining') }, sales: { $sum: 1 }, c: { $addToSet: '$customerId' } } },
         { $project: { _id: 0, remainingPaise: 1, sales: 1, customers: { $size: '$c' } } },
       ])
       .exec();
@@ -128,7 +129,7 @@ export class SalesRepository {
           $group: {
             _id: { $dateToString: { date: '$saleDate', format, timezone: 'UTC' } },
             weight: { $sum: '$weight' },
-            totalAmountPaise: { $sum: '$totalAmountPaise' },
+            totalAmountPaise: { $sum: paise('$totalAmount') },
           },
         },
       ])

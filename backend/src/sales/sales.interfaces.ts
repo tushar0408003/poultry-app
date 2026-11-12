@@ -34,6 +34,7 @@ export type CustomerRef = Pick<Customer, '_id' | 'ownerName' | 'phone'>;
 
 export type SaleWithCustomer = Omit<Sale, 'customerId'> & { customerId: CustomerRef | null };
 
+/** Aggregated totals: weight in kg, money in integer paise (summed exactly). */
 export interface SalesTotals {
   count: number;
   weight: number;

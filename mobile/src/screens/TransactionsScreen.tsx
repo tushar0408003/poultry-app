@@ -79,7 +79,13 @@ export function TransactionsScreen({ navigation }: TabScreenProps<'Transactions'
       data={sales}
       keyExtractor={(s) => s.id}
       ListHeaderComponent={header}
-      renderItem={({ item }) => <SaleRow sale={item} onPress={() => navigation.navigate('SaleDetail', { id: item.id })} />}
+      renderItem={({ item }) => (
+        <SaleRow
+          sale={item}
+          onPress={() => navigation.navigate('SaleDetail', { id: item.id })}
+          onEdit={() => navigation.navigate('EditSale', { id: item.id })}
+        />
+      )}
       onEndReached={() => hasNextPage && !isFetchingNextPage && fetchNextPage()}
       onEndReachedThreshold={0.4}
       refreshing={isRefetching && !isFetchingNextPage}

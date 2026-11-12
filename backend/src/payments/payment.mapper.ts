@@ -1,6 +1,5 @@
 import { Types } from 'mongoose';
 import { formatDateOnly } from '../common/dates';
-import { paiseToRupees } from '../common/money';
 import { toCustomerSummary } from '../sales/sale.mapper';
 import type { Payment } from './payment.schema';
 import type { CustomerRef } from '../sales/sales.interfaces';
@@ -14,7 +13,7 @@ export function toPaymentResponse(p: Payment | PaymentWithCustomer): PaymentResp
     saleId: p.saleId?.toString() ?? null,
     customerId,
     customer: toCustomerSummary(ref),
-    amount: paiseToRupees(p.amountPaise),
+    amount: p.amount,
     paymentMode: p.paymentMode,
     paymentDate: formatDateOnly(p.paymentDate),
     transactionReference: p.transactionReference ?? '',

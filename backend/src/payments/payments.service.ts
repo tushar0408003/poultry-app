@@ -44,17 +44,18 @@ export class PaymentsService {
           `Payment date cannot be before the sale date (${formatDateOnly(sale.saleDate)})`,
         );
       }
-      if (sale.remaining <= 0) throw new BadRequestException('This sale is already fully paid');
-      if (amountPaise > sale.remaining) {
+      const duePaise = rupeesToPaise(sale.remaining);
+      if (duePaise <= 0) throw new BadRequestException('This sale is already fully paid');
+      if (amountPaise > duePaise) {
         throw new BadRequestException(
-          `Amount (${formatInr(amountPaise)}) is more than the balance due (${formatInr(sale.remaining)})`,
+          `Amount (${formatInr(amountPaise)}) is more than the balance due (${formatInr(duePaise)})`,
         );
       }
       const [payment] = await this.payments.insertMany(
         [this.newPayment(dto, sale._id, sale.customerId, amountPaise, paymentDate)],
         session,
       );
-      await this.ledger.sync(sale._id, sale.totalAmountPaise, session);
+      await this.ledger.sync(sale._id, sale.totalAmount, session);
       return payment._id;
     });
 
@@ -76,7 +77,7 @@ export class PaymentsService {
       );
       const [paid] = await this.payments.customerPaymentStats([customerId], session);
       const outstandingDue = (customer.outstandingPaise ?? 0) - (paid ? paid.cashPaise + paid.onlinePaise : 0);
-      const due = outstandingDue + open.reduce((sum, s) => sum + s.remaining, 0);
+      const due = outstandingDue + open.reduce((sum, s) => sum + rupeesToPaise(s.remaining), 0);
       if (due === 0) throw new BadRequestException('This customer has no balance due on or before this date');
       if (amountPaise > due) {
         throw new BadRequestException(
@@ -96,13 +97,13 @@ export class PaymentsService {
       }
       for (const sale of open) {
         if (left === 0) break;
-        const part = Math.min(left, sale.remaining);
+        const part = Math.min(left, rupeesToPaise(sale.remaining));
         docs.push(this.newPayment(dto, sale._id, customerId, part, paymentDate));
         left -= part;
       }
       const created = await this.payments.insertMany(docs, session);
       for (const sale of open.filter((s) => docs.some((d) => d.saleId?.equals(s._id)))) {
-        await this.ledger.sync(sale._id, sale.totalAmountPaise, session);
+        await this.ledger.sync(sale._id, sale.totalAmount, session);
       }
       return created.map((p) => p._id);
     });
@@ -121,7 +122,7 @@ export class PaymentsService {
       if (!payment) throw new NotFoundException('Payment not found');
       const sale = payment.saleId ? await this.sales.findById(payment.saleId, session) : null;
       await this.payments.deleteById(id, session);
-      if (sale) await this.ledger.sync(sale._id, sale.totalAmountPaise, session);
+      if (sale) await this.ledger.sync(sale._id, sale.totalAmount, session);
       return payment.saleId;
     });
     if (!saleId) return { deleted: true, sale: null };
@@ -174,7 +175,7 @@ export class PaymentsService {
     return {
       saleId,
       customerId,
-      amountPaise,
+      amount: paiseToRupees(amountPaise),
       paymentMode: dto.paymentMode,
       paymentDate,
       transactionReference: dto.transactionReference ?? '',
