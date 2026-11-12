@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker, { DateTimePickerAndroid, DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, font, radius, spacing, touch } from '../theme';
@@ -32,9 +32,7 @@ export function DateField({
         mode: 'date',
         maximumDate,
         minimumDate: minDate,
-        onChange: (event: DateTimePickerEvent, date?: Date) => {
-          if (event.type === 'set' && date) onChange(toDateString(date));
-        },
+        onValueChange: (_, date) => onChange(toDateString(date)),
       });
     } else {
       setIosDraft(fromDateString(value));
@@ -65,7 +63,7 @@ export function DateField({
                 display="inline"
                 maximumDate={maximumDate}
                 minimumDate={minDate}
-                onChange={(_, d) => d && setIosDraft(d)}
+                onValueChange={(_, d) => setIosDraft(d)}
               />
               <Button
                 title="Done"
