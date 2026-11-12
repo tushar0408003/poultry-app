@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 import { errorMessage } from '../api/client';
@@ -33,7 +33,9 @@ export function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
+      {/* Android is edge-to-edge (window no longer resizes), so padding is needed on both platforms. */}
+      <KeyboardAvoidingView behavior="padding" style={styles.safe}>
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.brand}>
           <Text style={styles.title}>Sales Ledger</Text>
           <Text style={styles.subtitle}>Sales, payments and dues — simply.</Text>
@@ -77,6 +79,7 @@ export function LoginScreen() {
           />
         </Field>
         <Button title="Log in" onPress={submit} loading={isSubmitting} />
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -84,7 +87,7 @@ export function LoginScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  container: { flex: 1, justifyContent: 'center', padding: spacing.xl },
+  container: { flexGrow: 1, justifyContent: 'center', padding: spacing.xl },
   brand: { marginBottom: spacing.xxl },
   title: { fontSize: 32, fontWeight: '800', color: colors.text },
   subtitle: { fontSize: font.body, color: colors.textMuted, marginTop: spacing.xs },

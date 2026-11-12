@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, StyleSheet } from 'react-native';
+import { KeyboardAvoidingView, RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing } from '../theme';
 
@@ -15,7 +15,7 @@ export function Screen({
 }) {
   const { bottom } = useSafeAreaInsets();
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView style={styles.flex} behavior="padding">
       <ScrollView
         style={styles.flex}
         contentContainerStyle={[styles.content, { paddingBottom: styles.content.paddingBottom + bottom }]}
