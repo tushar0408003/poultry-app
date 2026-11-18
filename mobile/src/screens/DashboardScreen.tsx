@@ -1,14 +1,14 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useLayoutEffect, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { errorMessage } from '../api/client';
 import { useDashboard } from '../api/hooks';
-import type { PeriodSummary } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { DateField } from '../components/DateField';
-import { PaymentRow, SaleRow } from '../components/ledger';
+import { RecentActivity } from '../components/RecentActivity';
 import { Screen } from '../components/Screen';
 import { StatCard, StatGrid } from '../components/StatCard';
-import { Button, Card, Divider, EmptyState, ErrorState, IconButton, Loading, Row, SectionTitle } from '../components/ui';
+import { Button, ErrorState, IconButton, Loading, SectionTitle } from '../components/ui';
 import type { TabScreenProps } from '../navigation/types';
 import { colors, spacing } from '../theme';
 import { formatDate, todayString } from '../utils/dates';
@@ -22,9 +22,15 @@ export function DashboardScreen({ navigation }: TabScreenProps<'Dashboard'>) {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <View style={{ marginLeft: spacing.sm }}>
-          <IconButton icon="people-outline" label="Customers and suppliers" onPress={() => navigation.navigate('Customers')} />
-        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Customers and suppliers"
+          hitSlop={8}
+          onPress={() => navigation.navigate('Customers')}
+          style={({ pressed }) => [styles.people, pressed && { opacity: 0.7 }]}
+        >
+          <Ionicons name="people" size={22} color={colors.primary} />
+        </Pressable>
       ),
       headerRight: () => (
         <View style={{ flexDirection: 'row', marginRight: spacing.sm }}>
@@ -75,61 +81,29 @@ export function DashboardScreen({ navigation }: TabScreenProps<'Dashboard'>) {
           <View style={{ height: spacing.lg }} />
           <Button title="Add sale" icon="add" onPress={() => navigation.navigate('AddSale')} />
 
-          <SectionTitle>This week</SectionTitle>
-          <PeriodCard summary={data.week} />
-
-          <SectionTitle>This month</SectionTitle>
-          <PeriodCard summary={data.month} />
-
-          <SectionTitle
-            right={<Text style={styles.link} onPress={() => navigation.navigate('Transactions')}>See all</Text>}
-          >
-            Recent sales
-          </SectionTitle>
-          <Card style={styles.listCard}>
-            {data.recentSales.length === 0 ? (
-              <EmptyState message="No sales yet. Tap “Add sale” to record your first sale." />
-            ) : (
-              data.recentSales.map((s) => (
-                <SaleRow key={s.id} sale={s} onPress={() => navigation.navigate('SaleDetail', { id: s.id })} />
-              ))
-            )}
-          </Card>
-
-          {data.recentPayments.length > 0 && (
-            <>
-              <SectionTitle>Recent payments</SectionTitle>
-              <Card style={{ paddingVertical: 0 }}>
-                {data.recentPayments.map((p) => (
-                  <PaymentRow key={p.id} payment={p} showCustomer />
-                ))}
-              </Card>
-            </>
-          )}
+          <SectionTitle>Recent activity</SectionTitle>
+          <RecentActivity
+            sales={data.recentSales}
+            payments={data.recentPayments}
+            onOpenSale={(id) => navigation.navigate('SaleDetail', { id })}
+            onSeeAllSales={() => navigation.navigate('Transactions')}
+          />
         </>
       )}
     </Screen>
   );
 }
 
-function PeriodCard({ summary }: { summary: PeriodSummary }) {
-  return (
-    <Card>
-      <Text style={styles.period}>
-        {formatDate(summary.from)} – {formatDate(summary.to)}
-      </Text>
-      <Row label="Weight sold" value={formatKg(summary.sales.totalWeight)} />
-      <Row label="Sales" value={formatINR(summary.sales.totalAmount)} color={colors.sales} />
-      <Divider />
-      <Row label="Cash collected" value={formatINR(summary.collections.cash)} color={colors.received} />
-      <Row label="Online collected" value={formatINR(summary.collections.online)} color={colors.received} />
-      <Row label="Total collected" value={formatINR(summary.collections.total)} color={colors.received} bold />
-    </Card>
-  );
-}
-
 const styles = StyleSheet.create({
-  link: { color: colors.primary, fontWeight: '700', fontSize: 15 },
-  listCard: { padding: 0, overflow: 'hidden' },
-  period: { color: colors.textMuted, fontSize: 13, marginBottom: spacing.xs },
+  // Tinted round button so it reads as tappable, with room before the title.
+  people: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.salesBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: spacing.lg,
+    marginRight: spacing.md,
+  },
 });

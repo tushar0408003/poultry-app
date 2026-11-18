@@ -9,14 +9,14 @@ import { colors, font, spacing } from '../theme';
 import { todayString } from '../utils/dates';
 import { paiseToINR, toPaise } from '../utils/money';
 
-function makeSchema(maxPaise: number) {
+function makeSchema(maxPaise: number, dueLabel: string) {
   return z.object({
     amount: z
       .string()
       .trim()
       .min(1, 'Enter the amount')
       .refine((v) => (toPaise(v) ?? 0) > 0, 'Enter a valid amount (up to 2 decimals)')
-      .refine((v) => (toPaise(v) ?? 0) <= maxPaise, `Amount cannot be more than the balance due (${paiseToINR(maxPaise)})`),
+      .refine((v) => (toPaise(v) ?? 0) <= maxPaise, `Amount cannot be more than the ${dueLabel.toLowerCase()} (${paiseToINR(maxPaise)})`),
     paymentMode: z.enum(['CASH', 'ONLINE']),
     paymentDate: z.string(),
     transactionReference: z.string().trim().max(100),
@@ -50,7 +50,7 @@ export function PaymentForm({
 
     formState: { errors, isSubmitting },
   } = useForm<PaymentFormValues>({
-    resolver: zodResolver(makeSchema(duePaise)),
+    resolver: zodResolver(makeSchema(duePaise, dueLabel)),
     defaultValues: { amount: '', paymentMode: 'CASH', paymentDate: todayString(), transactionReference: '' },
   });
   const mode = useWatch({ control, name: 'paymentMode' });

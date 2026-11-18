@@ -15,6 +15,7 @@ import {
   weekRange,
 } from '../common/dates';
 import { paiseToRupees } from '../common/money';
+import { CustomersRepository } from '../customers/customers.repository';
 import { PaymentsRepository } from '../payments/payments.repository';
 import { SalesRepository } from '../sales/sales.repository';
 import type { CurrentOutstanding, PeriodSummary, Report, SeriesPoint } from './reports.interfaces';
@@ -27,6 +28,7 @@ export class ReportsService {
   constructor(
     private readonly sales: SalesRepository,
     private readonly payments: PaymentsRepository,
+    private readonly customers: CustomersRepository,
     private readonly clock: BusinessClock,
   ) {}
 
@@ -79,9 +81,34 @@ export class ReportsService {
     };
   }
 
+  /**
+   * Everything customers still owe, as of now: unpaid sales PLUS unpaid old dues
+   * (the outstanding entered on the customer, minus payments made against it).
+   * Same per-customer figure as the customer list, so the totals always match.
+   */
   async currentOutstanding(): Promise<CurrentOutstanding> {
-    const o = await this.sales.currentOutstanding();
-    return { amount: paiseToRupees(o.remainingPaise), customers: o.customers, sales: o.sales };
+    const customers = await this.customers.list();
+    const ids = customers.map((c) => c._id);
+    const [salesStats, paymentStats, unpaidSales] = await Promise.all([
+      ids.length ? this.sales.customerStats(ids) : [],
+      ids.length ? this.payments.customerPaymentStats(ids) : [],
+      this.sales.currentOutstanding(),
+    ]);
+    const remainingById = new Map(salesStats.map((s) => [s.customerId.toString(), s.remaining]));
+    const paidOldById = new Map(paymentStats.map((p) => [p._id.toString(), p.cashPaise + p.onlinePaise]));
+
+    let totalPaise = 0;
+    let owing = 0;
+    for (const c of customers) {
+      const key = c._id.toString();
+      const oldDuesLeft = Math.max((c.outstandingPaise ?? 0) - (paidOldById.get(key) ?? 0), 0);
+      const due = oldDuesLeft + (remainingById.get(key) ?? 0);
+      if (due > 0) {
+        totalPaise += due;
+        owing++;
+      }
+    }
+    return { amount: paiseToRupees(totalPaise), customers: owing, sales: unpaidSales.sales };
   }
 
   private async build(kind: PeriodKind, range: DateRange): Promise<Report> {

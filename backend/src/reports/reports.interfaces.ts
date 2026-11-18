@@ -23,7 +23,7 @@ export interface PeriodSummary {
 }
 
 export interface CurrentOutstanding {
-  /** Unpaid amount across ALL sales, as of now. */
+  /** Everything customers owe now: unpaid sales + unpaid old dues (matches the customer list total). */
   amount: number;
   customers: number;
   sales: number;

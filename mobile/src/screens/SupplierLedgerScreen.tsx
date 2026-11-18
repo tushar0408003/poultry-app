@@ -4,7 +4,6 @@ import { errorMessage } from '../api/client';
 import { useSupplierLedger } from '../api/hooks';
 import type { SupplierLedgerEntry } from '../api/types';
 import { Screen } from '../components/Screen';
-import { StatCard, StatGrid } from '../components/StatCard';
 import { Card, EmptyState, ErrorState, Loading, SectionTitle } from '../components/ui';
 import type { RootScreenProps } from '../navigation/types';
 import { colors, font, spacing } from '../theme';
@@ -20,20 +19,24 @@ export function SupplierLedgerScreen({ route, navigation }: RootScreenProps<'Sup
   const { data, isLoading, error, refetch, isRefetching } = useSupplierLedger(supplierId);
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: data ? `${data.ownerName}: balance sheet` : 'Balance sheet' });
-  }, [navigation, data]);
+    navigation.setOptions({ title: 'Balance sheet' });
+  }, [navigation]);
 
   if (isLoading) return <Loading />;
   if (error || !data) return <ErrorState message={errorMessage(error)} onRetry={refetch} />;
 
   return (
     <Screen onRefresh={refetch} refreshing={isRefetching}>
-      <StatGrid>
-        <StatCard label={balanceLabel(data.closingBalance)} value={formatINR(Math.abs(data.closingBalance))} tone={data.closingBalance > 0 ? 'due' : 'received'} wide />
-        <StatCard label="Old dues" value={formatINR(data.openingBalance)} />
-        <StatCard label="Purchases" value={formatINR(data.totalPurchases)} tone="sales" />
-        <StatCard label="Paid" value={formatINR(data.totalPaid)} tone="received" wide />
-      </StatGrid>
+      <Text style={styles.name}>{data.ownerName}</Text>
+      <Card style={styles.summary}>
+        <SummaryLine label="Old dues" value={formatINR(data.openingBalance)} />
+        <SummaryLine label="+ Purchases" value={formatINR(data.totalPurchases)} color={colors.sales} />
+        <SummaryLine label="− Paid" value={formatINR(data.totalPaid)} color={colors.received} />
+        <View style={styles.summaryTotal}>
+          <Text style={styles.totalLabel}>{balanceLabel(data.closingBalance)}</Text>
+          <Text style={[styles.totalValue, { color: balanceColor(data.closingBalance) }]}>{formatINR(Math.abs(data.closingBalance))}</Text>
+        </View>
+      </Card>
 
       <SectionTitle>Statement</SectionTitle>
       <Card style={styles.card}>
@@ -81,10 +84,35 @@ function LedgerRow({ entry: e }: { entry: SupplierLedgerEntry }) {
   );
 }
 
+function SummaryLine({ label, value, color }: { label: string; value: string; color?: string }) {
+  return (
+    <View style={styles.summaryLine}>
+      <Text style={styles.summaryLabel}>{label}</Text>
+      <Text style={[styles.summaryValue, color ? { color } : null]}>{value}</Text>
+    </View>
+  );
+}
+
 const balanceLabel = (balance: number) => (balance < 0 ? 'Advance paid' : 'Balance to pay');
 const balanceColor = (balance: number) => (balance > 0 ? colors.due : colors.received);
 
 const styles = StyleSheet.create({
+  name: { fontSize: font.title, fontWeight: '800', color: colors.text, marginBottom: spacing.md },
+  summary: { paddingVertical: spacing.sm },
+  summaryLine: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing.xs + 2 },
+  summaryLabel: { fontSize: font.body, color: colors.textMuted },
+  summaryValue: { fontSize: font.body, fontWeight: '700', color: colors.text },
+  summaryTotal: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing.sm,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  totalLabel: { fontSize: font.body + 1, fontWeight: '800', color: colors.text },
+  totalValue: { fontSize: font.title + 2, fontWeight: '800' },
   card: { padding: 0, overflow: 'hidden', marginTop: spacing.md },
   row: {
     flexDirection: 'row',

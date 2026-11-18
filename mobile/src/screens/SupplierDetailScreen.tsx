@@ -201,6 +201,7 @@ export function SupplierDetailScreen({ route, navigation }: RootScreenProps<'Sup
 }
 
 function PurchaseRow({ purchase: p, onPress }: { purchase: Purchase; onPress: () => void }) {
+  const paidWith = p.cashPaid + p.onlinePaid;
   return (
     <Pressable style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.surface }]} onPress={onPress}>
       <View style={{ flex: 1 }}>
@@ -211,8 +212,9 @@ function PurchaseRow({ purchase: p, onPress }: { purchase: Purchase; onPress: ()
       </View>
       <View style={{ alignItems: 'flex-end' }}>
         <Text style={styles.rowTitle}>{formatINR(p.totalAmount)}</Text>
-        <Text style={[styles.muted, { color: p.remaining > 0 ? colors.due : colors.received }]}>
-          {p.remaining > 0 ? `${formatINR(p.cashPaid + p.onlinePaid)} paid` : 'Paid in full'}
+        {/* Only what was paid WITH this purchase; later payments go against the whole balance. */}
+        <Text style={[styles.muted, paidWith > 0 && { color: colors.received, fontWeight: '600' }]}>
+          {p.remaining === 0 ? 'Paid in full' : paidWith > 0 ? `${formatINR(paidWith)} paid` : 'On credit'}
         </Text>
       </View>
     </Pressable>
