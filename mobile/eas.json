@@ -9,7 +9,7 @@
     "preview": {
       "distribution": "internal",
       "android": { "buildType": "apk" },
-      "env": { "EXPO_PUBLIC_API_URL": "http://192.168.1.10:3000" }
+      "env": { "EXPO_PUBLIC_API_URL": "https://poultry-api.onrender.com" }
     },
     "production": {
       "android": { "buildType": "app-bundle" },

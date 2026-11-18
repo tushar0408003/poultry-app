@@ -1,0 +1,36 @@
+# Render Blueprint: deploys the NestJS API in backend/ as a free web service.
+# Render dashboard -> New -> Blueprint -> pick this repo. Secrets marked `sync: false`
+# are asked for once in the dashboard and never stored in git.
+services:
+  - type: web
+    name: poultry-api
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: backend
+    branch: main
+    # --prod=false: NODE_ENV=production would otherwise skip the dev tools `nest build` needs.
+    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm build
+    startCommand: node dist/main
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 22.12.0
+      - key: NODE_ENV
+        value: production
+      - key: BUSINESS_TZ_OFFSET_MINUTES
+        value: "330"
+      - key: JWT_EXPIRES_IN
+        value: 30d
+      - key: CORS_ORIGINS
+        value: "*"
+      # --- secrets: enter these in the Render dashboard ---
+      - key: MONGODB_URI
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true

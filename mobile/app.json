@@ -36,8 +36,15 @@
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-status-bar"
     ],
-    "scheme": "salesledger"
+    "scheme": "salesledger",
+    "extra": {
+      "eas": {
+        "projectId": "0fea3913-e004-497e-8723-3e25f2fec005"
+      }
+    },
+    "owner": "tusharjakhar001"
   }
 }

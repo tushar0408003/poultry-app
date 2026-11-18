@@ -2,6 +2,7 @@
   "name": "supplier-ledger-backend",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.32.1",
   "description": "Sales & payment ledger API for a wholesale supplier",
   "scripts": {
     "build": "nest build",

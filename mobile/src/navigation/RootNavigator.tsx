@@ -56,7 +56,7 @@ function MainTabs() {
         ),
       })}
     >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Poultry' }} />
+      <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Poultry', headerTitleAlign: 'center' }} />
       <Tab.Screen name="AddSale" component={AddSaleScreen} options={{ title: 'Add Sale' }} />
       <Tab.Screen name="Transactions" component={TransactionsScreen} />
       <Tab.Screen name="Reports" component={ReportsScreen} />

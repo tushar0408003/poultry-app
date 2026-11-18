@@ -3,7 +3,8 @@ import { API_URL } from '../config';
 
 export const api = axios.create({ // eslint-disable-line import/no-named-as-default-member
   baseURL: API_URL,
-  timeout: 15_000,
+  // Generous: the free hosting plan sleeps when idle and needs ~30-50 s to wake on the first request.
+  timeout: 60_000,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -38,7 +39,7 @@ export function errorMessage(error: unknown): string {
   if (isAxiosError(error)) {
     if (!error.response) {
       return error.code === 'ECONNABORTED'
-        ? 'The server is taking too long. Please try again.'
+        ? 'The server is taking too long (it may be waking up). Please try again.'
         : `Cannot reach the server (${API_URL}). Check your internet connection.`;
     }
     const message = (error.response.data as { message?: string | string[] } | undefined)?.message;
