@@ -44,6 +44,117 @@ export interface CustomerInput {
   outstanding: number;
 }
 
+export interface SupplierStats {
+  purchasesCount: number;
+  weight: number;
+  purchases: number;
+  /** Paid while entering purchases. */
+  paidAtPurchase: number;
+  /** Paid later against the balance. */
+  payments: number;
+  paymentsCount: number;
+  /** paidAtPurchase + payments */
+  paid: number;
+  /** outstanding + purchases - paid: still owed to the supplier (negative = advance). */
+  balance: number;
+}
+
+export interface SupplierPayment {
+  id: string;
+  supplierId: string;
+  paymentDate: string;
+  amount: number;
+  paymentMode: PaymentMode;
+  transactionReference: string;
+  notes: string;
+}
+
+export interface SupplierPaymentInput {
+  amount: number;
+  paymentMode: PaymentMode;
+  paymentDate?: string;
+  transactionReference?: string;
+  notes?: string;
+}
+
+export interface SupplierLedgerEntry {
+  id: string;
+  type: 'OPENING' | 'PURCHASE' | 'PAYMENT';
+  date: string | null;
+  description: string;
+  weight: number | null;
+  rate: number | null;
+  /** Added to what we owe (purchase / old dues). */
+  debit: number;
+  /** Paid to the supplier. */
+  credit: number;
+  /** Running balance after this line. */
+  balance: number;
+}
+
+export interface SupplierLedger {
+  supplierId: string;
+  ownerName: string;
+  openingBalance: number;
+  totalPurchases: number;
+  totalPaid: number;
+  closingBalance: number;
+  /** Oldest first. */
+  entries: SupplierLedgerEntry[];
+}
+
+export interface Supplier {
+  id: string;
+  ownerName: string;
+  phone: string;
+  address: string;
+  /** Old dues owed to the supplier, rupees. */
+  outstanding: number;
+  /** Rate per kg, rupees. */
+  rate: number;
+  /** Weight entered on the supplier, kg. */
+  weight: number;
+  createdAt: string;
+  updatedAt: string;
+  stats: SupplierStats;
+}
+
+export interface SupplierInput {
+  ownerName: string;
+  phone?: string;
+  address?: string;
+  outstanding: number;
+  rate: number;
+  weight?: number;
+}
+
+export interface Purchase {
+  id: string;
+  supplierId: string;
+  supplier: { id: string; ownerName: string; phone: string } | null;
+  purchaseDate: string;
+  weight: number;
+  /** Rate per kg used for this purchase. */
+  rate: number;
+  totalAmount: number;
+  cashPaid: number;
+  onlinePaid: number;
+  remaining: number;
+  status: PaymentStatus;
+  notes: string;
+}
+
+export interface PurchaseInput {
+  supplierId: string;
+  purchaseDate?: string;
+  weight: number;
+  /** Defaults to the supplier's rate on the server when left out. */
+  rate?: number;
+  cashPaid?: number;
+  onlinePaid?: number;
+  notes?: string;
+}
+
 export interface Payment {
   id: string;
   saleId: string | null;

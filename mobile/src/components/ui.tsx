@@ -14,6 +14,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { colors, font, radius, spacing, touch } from '../theme';
+import { useRevealFocusedInput } from './Screen';
 
 // ---------- Text ----------
 
@@ -130,10 +131,21 @@ export function Input({
   ref,
   ...props
 }: TextInputProps & { error?: boolean; prefix?: string; suffix?: string; ref?: Ref<TextInputInstance> }) {
+  const reveal = useRevealFocusedInput();
   return (
     <View style={[styles.inputWrap, error && styles.inputError, props.editable === false && styles.inputDisabled]}>
       {prefix && <Text style={styles.affix}>{prefix}</Text>}
-      <TextInput ref={ref} placeholderTextColor={colors.textMuted} style={[styles.input, style]} {...props} />
+      <TextInput
+        ref={ref}
+        placeholderTextColor={colors.textMuted}
+        style={[styles.input, style]}
+        {...props}
+        onFocus={(e) => {
+          props.onFocus?.(e);
+          // Moving to another field while the keyboard is already open fires no keyboard event.
+          reveal();
+        }}
+      />
       {suffix && <Text style={styles.affix}>{suffix}</Text>}
     </View>
   );

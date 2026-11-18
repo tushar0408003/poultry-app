@@ -12,7 +12,14 @@ import type {
   Sale,
   SaleDetail,
   SaleInput,
+  Purchase,
+  PurchaseInput,
   SalesQuery,
+  Supplier,
+  SupplierInput,
+  SupplierLedger,
+  SupplierPayment,
+  SupplierPaymentInput,
 } from './types';
 
 /** Drops empty values so they are not sent as query parameters. */
@@ -32,6 +39,29 @@ export const customersApi = {
   create: (input: CustomerInput) => api.post<Customer>('/customers', input).then((r) => r.data),
   update: (id: string, input: Partial<CustomerInput>) => api.patch<Customer>(`/customers/${id}`, input).then((r) => r.data),
   remove: (id: string) => api.delete(`/customers/${id}`).then((r) => r.data),
+};
+
+export const suppliersApi = {
+  list: (search?: string) => api.get<Supplier[]>('/suppliers', { params: clean({ search }) }).then((r) => r.data),
+  get: (id: string) => api.get<Supplier>(`/suppliers/${id}`).then((r) => r.data),
+  create: (input: SupplierInput) => api.post<Supplier>('/suppliers', input).then((r) => r.data),
+  update: (id: string, input: Partial<SupplierInput>) => api.patch<Supplier>(`/suppliers/${id}`, input).then((r) => r.data),
+  remove: (id: string) => api.delete(`/suppliers/${id}`).then((r) => r.data),
+  ledger: (id: string) => api.get<SupplierLedger>(`/suppliers/${id}/ledger`).then((r) => r.data),
+  payments: (id: string) => api.get<SupplierPayment[]>(`/suppliers/${id}/payments`).then((r) => r.data),
+  addPayment: (id: string, input: SupplierPaymentInput) =>
+    api.post<SupplierPayment>(`/suppliers/${id}/payments`, input).then((r) => r.data),
+  removePayment: (id: string, paymentId: string) =>
+    api.delete<{ deleted: true }>(`/suppliers/${id}/payments/${paymentId}`).then((r) => r.data),
+};
+
+export const purchasesApi = {
+  bySupplier: (supplierId: string, page = 1) =>
+    api.get<Paginated<Purchase>>('/purchases', { params: { supplierId, page, limit: 20 } }).then((r) => r.data),
+  get: (id: string) => api.get<Purchase>(`/purchases/${id}`).then((r) => r.data),
+  create: (input: PurchaseInput) => api.post<Purchase>('/purchases', input).then((r) => r.data),
+  update: (id: string, input: Partial<PurchaseInput>) => api.patch<Purchase>(`/purchases/${id}`, input).then((r) => r.data),
+  remove: (id: string) => api.delete<{ deleted: true }>(`/purchases/${id}`).then((r) => r.data),
 };
 
 export const salesApi = {

@@ -15,10 +15,15 @@ export type RootStackParamList = {
   SaleDetail: { id: string };
   EditSale: { id: string };
   AddPayment: { saleId: string };
-  Customers: undefined;
+  Customers: { section?: 'customers' | 'suppliers' } | undefined;
   CustomerDetail: { id: string };
   CustomerForm: { id?: string };
   CollectPayment: { customerId: string };
+  SupplierForm: { id?: string };
+  SupplierDetail: { id: string };
+  PurchaseForm: { supplierId: string; id?: string };
+  PaySupplier: { supplierId: string };
+  SupplierLedger: { supplierId: string };
 };
 
 export type RootScreenProps<T extends keyof RootStackParamList> = NativeStackScreenProps<RootStackParamList, T>;

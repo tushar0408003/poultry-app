@@ -101,17 +101,24 @@ Response (also returned by GET/PATCH `/sales/:id`):
 ```
 `cashReceived` / `onlineReceived` are payments **dated that day**, including payments for older sales.
 
-## Settings
+## Suppliers
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/settings` | `{ businessName, defaultPurchaseRate, defaultSaleRate, updatedAt }` (defaults on first use) |
-| PATCH | `/settings` | Any of `businessName`, `defaultPurchaseRate`, `defaultSaleRate` (₹, 0 = none). Default rates only pre-fill forms |
+| POST | `/suppliers` | `{ ownerName, phone?, address?, outstanding, rate, weight? }` (rate ₹/kg, weight kg) |
+| GET | `/suppliers?search=` | Each with `stats: { purchasesCount, weight, purchases, paidAtPurchase, payments, paymentsCount, paid, balance }` |
+| GET / PATCH / DELETE | `/suppliers/:id` | DELETE also removes the supplier's purchases and payments |
+| GET | `/suppliers/:id/ledger` | Balance sheet: opening dues, purchases and payments (oldest first) with running balance |
+| GET / POST | `/suppliers/:id/payments` | POST `{ amount, paymentMode: CASH\|ONLINE, paymentDate?, transactionReference?, notes? }`; cannot exceed the balance |
+| DELETE | `/suppliers/:id/payments/:paymentId` | |
 
-## Audit
-`GET /audit?entity=&entityId=&page=&limit=`: change history, newest first.
-`entity`: customer, supplier, purchase, sale, payment, expense, stock, settings.
-Each item: `{ id, entity, entityId, action: CREATE|UPDATE|DELETE, before, after, changedFields, username, at }`
-(snapshots are in stored units: paise / grams).
+## Purchases
+| Method | Path | Notes |
+|---|---|---|
+| POST | `/purchases` | `{ supplierId, weight, rate?, purchaseDate?, cashPaid?, onlinePaid?, notes? }`; `rate` defaults to the supplier's rate and is stored on the purchase |
+| GET | `/purchases?supplierId=&page=&limit=` | Paginated, newest first |
+| GET / PATCH / DELETE | `/purchases/:id` | |
+
+Deleting a customer (`DELETE /customers/:id`) also removes their sales and payments.
 
 ## Health
 `GET /health` → `{ "status": "ok", "database": "connected" }` (no auth)

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
-import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Keyboard, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, font, radius, spacing, touch } from '../theme';
 import { formatDate, fromDateString, toDateString, todayString } from '../utils/dates';
 import { Button } from './ui';
@@ -26,6 +26,8 @@ export function DateField({
   const minDate = minimumDate ? fromDateString(minimumDate) : undefined;
 
   const open = () => {
+    // A keyboard left open from a previous field would cover the picker.
+    Keyboard.dismiss();
     if (Platform.OS === 'android') {
       DateTimePickerAndroid.open({
         value: fromDateString(value),
@@ -55,25 +57,35 @@ export function DateField({
 
       {Platform.OS === 'ios' && (
         <Modal visible={iosOpen} transparent animationType="fade" onRequestClose={() => setIosOpen(false)}>
-          <View style={styles.overlay}>
-            <View style={styles.sheet}>
+          {/* Tapping outside the calendar cancels. */}
+          <Pressable style={styles.overlay} onPress={() => setIosOpen(false)} accessibilityLabel="Close date picker">
+            <Pressable style={styles.sheet} onPress={() => {}}>
               <DateTimePicker
                 value={iosDraft}
                 mode="date"
                 display="inline"
+                // The app is always light; without this, iOS dark mode draws white text on the white sheet.
+                themeVariant="light"
+                accentColor={colors.primary}
+                locale="en-IN"
                 maximumDate={maximumDate}
                 minimumDate={minDate}
                 onValueChange={(_, d) => setIosDraft(d)}
+                style={styles.calendar}
               />
-              <Button
-                title="Done"
-                onPress={() => {
-                  onChange(toDateString(iosDraft));
-                  setIosOpen(false);
-                }}
-              />
-            </View>
-          </View>
+              <View style={styles.buttons}>
+                <Button title="Cancel" variant="secondary" onPress={() => setIosOpen(false)} style={styles.flex} />
+                <Button
+                  title="Done"
+                  onPress={() => {
+                    onChange(toDateString(iosDraft));
+                    setIosOpen(false);
+                  }}
+                  style={styles.flex}
+                />
+              </View>
+            </Pressable>
+          </Pressable>
         </Modal>
       )}
     </>
@@ -95,4 +107,7 @@ const styles = StyleSheet.create({
   text: { flex: 1, fontSize: font.body + 1, color: colors.text, marginLeft: spacing.sm, fontWeight: '600' },
   overlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', padding: spacing.lg },
   sheet: { backgroundColor: colors.background, borderRadius: radius.lg, padding: spacing.lg },
+  calendar: { alignSelf: 'stretch' },
+  buttons: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.md },
+  flex: { flex: 1 },
 });

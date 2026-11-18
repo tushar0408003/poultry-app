@@ -56,8 +56,8 @@ export class CustomersRepository implements OnModuleInit {
       .exec();
   }
 
-  async deleteById(id: Types.ObjectId): Promise<boolean> {
-    const res = await this.model.deleteOne({ _id: id }).exec();
+  async deleteById(id: Types.ObjectId, session?: ClientSession): Promise<boolean> {
+    const res = await this.model.deleteOne({ _id: id }, { session }).exec();
     return res.deletedCount === 1;
   }
 

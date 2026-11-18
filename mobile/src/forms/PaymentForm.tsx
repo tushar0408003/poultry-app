@@ -31,12 +31,17 @@ export function PaymentForm({
   onSubmit,
   submitError,
   submitLabel = 'Save payment',
+  dueLabel = 'Balance due',
+  amountLabel = 'Amount received',
 }: {
   duePaise: number;
   minimumDate?: string;
   onSubmit: (input: PaymentInput) => Promise<void>;
   submitError?: string;
   submitLabel?: string;
+  /** Wording for paying a supplier instead of receiving from a customer. */
+  dueLabel?: string;
+  amountLabel?: string;
 }) {
   const {
     control,
@@ -63,13 +68,13 @@ export function PaymentForm({
   return (
     <View>
       <View style={styles.dueBox}>
-        <Text style={styles.dueLabel}>Balance due</Text>
+        <Text style={styles.dueLabel}>{dueLabel}</Text>
         <Text style={styles.dueValue}>{paiseToINR(duePaise)}</Text>
       </View>
 
       {submitError && <Banner tone="error" message={submitError} />}
 
-      <Field label="Amount received" error={errors.amount?.message}>
+      <Field label={amountLabel} error={errors.amount?.message}>
         <Controller
           control={control}
           name="amount"

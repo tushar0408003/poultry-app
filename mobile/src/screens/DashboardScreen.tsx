@@ -21,9 +21,13 @@ export function DashboardScreen({ navigation }: TabScreenProps<'Dashboard'>) {
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerLeft: () => (
+        <View style={{ marginLeft: spacing.sm }}>
+          <IconButton icon="people-outline" label="Customers and suppliers" onPress={() => navigation.navigate('Customers')} />
+        </View>
+      ),
       headerRight: () => (
         <View style={{ flexDirection: 'row', marginRight: spacing.sm }}>
-          <IconButton icon="people-outline" label="Customers" onPress={() => navigation.navigate('Customers')} />
           <IconButton
             icon="log-out-outline"
             label="Log out"

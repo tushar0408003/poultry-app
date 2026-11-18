@@ -72,9 +72,11 @@ export class SalesRepository {
     await this.model.deleteOne({ _id: id }, { session }).exec();
   }
 
-  async existsForCustomer(customerId: Types.ObjectId): Promise<boolean> {
-    return (await this.model.exists({ customerId })) !== null;
+  async deleteByCustomer(customerId: Types.ObjectId, session?: ClientSession): Promise<number> {
+    const res = await this.model.deleteMany({ customerId }, { session }).exec();
+    return res.deletedCount;
   }
+
 
   /** Lifetime purchase/payment totals per customer. */
   customerStats(customerIds?: Types.ObjectId[]): Promise<CustomerSalesStats[]> {

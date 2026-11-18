@@ -35,8 +35,14 @@ export function CustomerDetailScreen({ route, navigation }: RootScreenProps<'Cus
   const paymentItems = payments.data?.pages.flatMap((p) => p.items) ?? [];
   const active = tab === 'sales' ? sales : payments;
 
+  const hasHistory = s.salesCount > 0 || s.onlinePayment + s.offlinePayment > 0;
   const confirmDelete = () =>
-    Alert.alert('Delete customer?', `${customer.ownerName} will be removed. This cannot be undone.`, [
+    Alert.alert(
+      'Delete customer?',
+      hasHistory
+        ? `${customer.ownerName} and all their history (${s.salesCount} sale${s.salesCount === 1 ? '' : 's'} and every payment received) will be deleted. This cannot be undone.`
+        : `${customer.ownerName} will be removed. This cannot be undone.`,
+      [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',
@@ -50,7 +56,8 @@ export function CustomerDetailScreen({ route, navigation }: RootScreenProps<'Cus
           }
         },
       },
-    ]);
+      ],
+    );
 
   return (
     <Screen
@@ -133,9 +140,14 @@ export function CustomerDetailScreen({ route, navigation }: RootScreenProps<'Cus
         <Button title="Load more" variant="secondary" onPress={() => active.fetchNextPage()} loading={active.isFetchingNextPage} style={{ marginTop: spacing.md }} />
       )}
 
-      {s.salesCount === 0 && (
-        <Button title="Delete customer" variant="danger" icon="trash-outline" onPress={confirmDelete} style={{ marginTop: spacing.xl }} />
-      )}
+      <Button
+        title="Delete customer"
+        variant="danger"
+        icon="trash-outline"
+        onPress={confirmDelete}
+        loading={deleteCustomer.isPending}
+        style={{ marginTop: spacing.xl }}
+      />
     </Screen>
   );
 }

@@ -326,12 +326,13 @@ describe('Supplier ledger (e2e)', () => {
   });
 
   describe('customer deletion', () => {
-    it('blocks deleting a customer with sales, allows it without', async () => {
-      const s = (await post('/sales', { customerId: shopB, weight: 1, totalAmount: 1 }).expect(201)).body.id;
-      await del(`/customers/${shopB}`).expect(409);
-      await del(`/sales/${s}`).expect(200);
-      await del(`/customers/${shopB}`).expect(200);
+    it('deletes a customer together with their sales and payments', async () => {
+      const s = (await post('/sales', { customerId: shopB, weight: 1, totalAmount: 10, cashReceived: 4 }).expect(201)).body.id;
+      const res = await del(`/customers/${shopB}`).expect(200);
+      expect(res.body).toEqual({ deleted: true, salesDeleted: 1, paymentsDeleted: 1 });
       await get(`/customers/${shopB}`).expect(404);
+      await get(`/sales/${s}`).expect(404);
+      await get(`/payments/${s}`).expect(404);
     });
 
     it('rejects malformed ids', async () => {

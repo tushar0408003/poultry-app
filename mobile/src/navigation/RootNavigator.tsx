@@ -16,6 +16,11 @@ import { EditSaleScreen } from '../screens/EditSaleScreen';
 import { LoginScreen } from '../screens/LoginScreen';
 import { ReportsScreen } from '../screens/ReportsScreen';
 import { SaleDetailScreen } from '../screens/SaleDetailScreen';
+import { PaySupplierScreen } from '../screens/PaySupplierScreen';
+import { PurchaseFormScreen } from '../screens/PurchaseFormScreen';
+import { SupplierLedgerScreen } from '../screens/SupplierLedgerScreen';
+import { SupplierDetailScreen } from '../screens/SupplierDetailScreen';
+import { SupplierFormScreen } from '../screens/SupplierFormScreen';
 import { TransactionsScreen } from '../screens/TransactionsScreen';
 import { colors } from '../theme';
 import type { RootStackParamList, TabParamList } from './types';
@@ -80,6 +85,11 @@ export function RootNavigator() {
             <Stack.Screen name="CustomerDetail" component={CustomerDetailScreen} options={{ title: 'Customer' }} />
             <Stack.Screen name="CustomerForm" component={CustomerFormScreen} options={{ title: 'Customer' }} />
             <Stack.Screen name="CollectPayment" component={CollectPaymentScreen} options={{ title: 'Receive payment' }} />
+            <Stack.Screen name="SupplierForm" component={SupplierFormScreen} options={{ title: 'Supplier' }} />
+            <Stack.Screen name="SupplierDetail" component={SupplierDetailScreen} options={{ title: 'Supplier' }} />
+            <Stack.Screen name="PurchaseForm" component={PurchaseFormScreen} options={{ title: 'Purchase' }} />
+            <Stack.Screen name="PaySupplier" component={PaySupplierScreen} options={{ title: 'Pay supplier' }} />
+            <Stack.Screen name="SupplierLedger" component={SupplierLedgerScreen} options={{ title: 'Balance sheet' }} />
           </>
         )}
       </Stack.Navigator>

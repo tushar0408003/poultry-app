@@ -1,6 +1,7 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { formatInr, rupeesToPaise } from '../common/money';
+import { TransactionService } from '../database/transaction.service';
 import { PaymentsRepository } from '../payments/payments.repository';
 import { SalesRepository } from '../sales/sales.repository';
 import { Customer } from './customer.schema';
@@ -15,6 +16,7 @@ export class CustomersService {
     private readonly customers: CustomersRepository,
     private readonly sales: SalesRepository,
     private readonly payments: PaymentsRepository,
+    private readonly tx: TransactionService,
   ) {}
 
   async create(dto: CreateCustomerDto): Promise<CustomerResponse> {
@@ -71,13 +73,18 @@ export class CustomersService {
     return this.withStats(updated);
   }
 
-  /** Customers with sales history cannot be deleted, so no sale is ever orphaned. */
-  async remove(id: Types.ObjectId): Promise<{ deleted: true }> {
-    if ((await this.sales.existsForCustomer(id)) || (await this.payments.existsForCustomer(id))) {
-      throw new ConflictException('This customer has sales. Delete their sales and payments first, or keep the customer.');
-    }
-    if (!(await this.customers.deleteById(id))) throw new NotFoundException('Customer not found');
-    return { deleted: true };
+  /**
+   * Deletes the customer together with all of their sales and payments, atomically,
+   * so nothing is left pointing at a missing customer.
+   */
+  async remove(id: Types.ObjectId): Promise<{ deleted: true; salesDeleted: number; paymentsDeleted: number }> {
+    return this.tx.run(async (session) => {
+      if (!(await this.customers.findById(id, session))) throw new NotFoundException('Customer not found');
+      const paymentsDeleted = await this.payments.deleteByCustomer(id, session);
+      const salesDeleted = await this.sales.deleteByCustomer(id, session);
+      await this.customers.deleteById(id, session);
+      return { deleted: true as const, salesDeleted, paymentsDeleted };
+    });
   }
 
   private async withStats(customer: Customer): Promise<CustomerResponse> {

@@ -2,22 +2,58 @@ import { useLayoutEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { errorMessage } from '../api/client';
 import { useCustomers } from '../api/hooks';
-import { EmptyState, ErrorState, IconButton, Input, Loading } from '../components/ui';
+import { SuppliersList } from '../components/SuppliersList';
+import { EmptyState, ErrorState, IconButton, Input, Loading, Segmented } from '../components/ui';
 import type { RootScreenProps } from '../navigation/types';
 import { colors, font, spacing } from '../theme';
 import { formatINR } from '../utils/money';
 import { useDebounced } from '../utils/useDebounced';
 
-export function CustomersScreen({ navigation }: RootScreenProps<'Customers'>) {
+type Section = 'customers' | 'suppliers';
+
+/** Customers and suppliers in one place, switched with a two-way toggle at the top. */
+export function CustomersScreen({ navigation, route }: RootScreenProps<'Customers'>) {
+  const [section, setSection] = useState<Section>(route.params?.section ?? 'customers');
+
+  useLayoutEffect(() => {
+    const isSuppliers = section === 'suppliers';
+    navigation.setOptions({
+      title: isSuppliers ? 'Suppliers' : 'Customers',
+      headerRight: () => (
+        <IconButton
+          icon="person-add-outline"
+          label={isSuppliers ? 'Add supplier' : 'Add customer'}
+          onPress={() => (isSuppliers ? navigation.navigate('SupplierForm', {}) : navigation.navigate('CustomerForm', {}))}
+        />
+      ),
+    });
+  }, [navigation, section]);
+
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <View style={styles.toggle}>
+        <Segmented
+          value={section}
+          onChange={setSection}
+          options={[
+            { value: 'customers', label: 'Customers' },
+            { value: 'suppliers', label: 'Suppliers' },
+          ]}
+        />
+      </View>
+      {section === 'customers' ? (
+        <CustomersList onOpen={(id) => navigation.navigate('CustomerDetail', { id })} />
+      ) : (
+        <SuppliersList onOpen={(id) => navigation.navigate('SupplierDetail', { id })} />
+      )}
+    </View>
+  );
+}
+
+function CustomersList({ onOpen }: { onOpen: (id: string) => void }) {
   const [search, setSearch] = useState('');
   const debounced = useDebounced(search.trim());
   const { data, isLoading, error, refetch, isRefetching } = useCustomers(debounced || undefined);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => <IconButton icon="person-add-outline" label="Add customer" onPress={() => navigation.navigate('CustomerForm', {})} />,
-    });
-  }, [navigation]);
 
   const totalDue = (data ?? []).reduce((s, c) => s + c.stats.outstandingBalance, 0);
 
@@ -52,7 +88,7 @@ export function CustomersScreen({ navigation }: RootScreenProps<'Customers'>) {
       renderItem={({ item }) => (
         <Pressable
           style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.surface }]}
-          onPress={() => navigation.navigate('CustomerDetail', { id: item.id })}
+          onPress={() => onOpen(item.id)}
         >
           <View style={{ flex: 1 }}>
             <Text style={styles.name}>{item.ownerName}</Text>
@@ -71,6 +107,7 @@ export function CustomersScreen({ navigation }: RootScreenProps<'Customers'>) {
 }
 
 const styles = StyleSheet.create({
+  toggle: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
   header: { padding: spacing.lg, gap: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border },
   summary: { color: colors.textMuted, fontSize: font.small },
   row: { flexDirection: 'row', alignItems: 'center', padding: spacing.lg, borderBottomWidth: 1, borderBottomColor: colors.border },

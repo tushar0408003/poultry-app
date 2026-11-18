@@ -1,6 +1,15 @@
 import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { customersApi, dashboardApi, paymentsApi, reportsApi, salesApi } from './endpoints';
-import type { CustomerInput, PaymentInput, ReportKind, SaleInput, SalesQuery } from './types';
+import { customersApi, dashboardApi, paymentsApi, purchasesApi, reportsApi, salesApi, suppliersApi } from './endpoints';
+import type {
+  CustomerInput,
+  PaymentInput,
+  PurchaseInput,
+  ReportKind,
+  SaleInput,
+  SalesQuery,
+  SupplierInput,
+  SupplierPaymentInput,
+} from './types';
 
 export const queryKeys = {
   dashboard: (date: string) => ['dashboard', date] as const,
@@ -9,6 +18,12 @@ export const queryKeys = {
   customers: (search?: string) => ['customers', search ?? ''] as const,
   customer: (id: string) => ['customer', id] as const,
   customerPayments: (id: string) => ['customerPayments', id] as const,
+  suppliers: (search?: string) => ['suppliers', search ?? ''] as const,
+  supplier: (id: string) => ['supplier', id] as const,
+  supplierPurchases: (supplierId: string) => ['supplierPurchases', supplierId] as const,
+  purchase: (id: string) => ['purchase', id] as const,
+  supplierPayments: (supplierId: string) => ['supplierPayments', supplierId] as const,
+  supplierLedger: (supplierId: string) => ['supplierLedger', supplierId] as const,
   report: (kind: ReportKind, params: object) => ['report', kind, params] as const,
 };
 
@@ -53,6 +68,33 @@ export const useCustomerPayments = (id: string) =>
     initialPageParam: 1,
     getNextPageParam: (last) => (last.hasMore ? last.page + 1 : undefined),
   });
+
+export const useSuppliers = (search?: string) =>
+  useQuery({
+    queryKey: queryKeys.suppliers(search),
+    queryFn: () => suppliersApi.list(search),
+    placeholderData: keepPreviousData,
+  });
+
+export const useSupplier = (id: string) =>
+  useQuery({ queryKey: queryKeys.supplier(id), queryFn: () => suppliersApi.get(id), enabled: !!id });
+
+export const useSupplierPurchases = (supplierId: string) =>
+  useInfiniteQuery({
+    queryKey: queryKeys.supplierPurchases(supplierId),
+    queryFn: ({ pageParam }) => purchasesApi.bySupplier(supplierId, pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (last) => (last.hasMore ? last.page + 1 : undefined),
+  });
+
+export const usePurchase = (id: string) =>
+  useQuery({ queryKey: queryKeys.purchase(id), queryFn: () => purchasesApi.get(id), enabled: !!id });
+
+export const useSupplierPayments = (supplierId: string) =>
+  useQuery({ queryKey: queryKeys.supplierPayments(supplierId), queryFn: () => suppliersApi.payments(supplierId) });
+
+export const useSupplierLedger = (supplierId: string) =>
+  useQuery({ queryKey: queryKeys.supplierLedger(supplierId), queryFn: () => suppliersApi.ledger(supplierId) });
 
 export const useReport = (kind: ReportKind, params: { date?: string; from?: string; to?: string }) =>
   useQuery({
@@ -112,4 +154,53 @@ export function useUpdateCustomer(id: string) {
 export function useDeleteCustomer() {
   const invalidate = useInvalidateAll();
   return useMutation({ mutationFn: (id: string) => customersApi.remove(id), onSuccess: invalidate });
+}
+
+export function useCreateSupplier() {
+  const invalidate = useInvalidateAll();
+  return useMutation({ mutationFn: (input: SupplierInput) => suppliersApi.create(input), onSuccess: invalidate });
+}
+
+export function useUpdateSupplier(id: string) {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: Partial<SupplierInput>) => suppliersApi.update(id, input),
+    onSuccess: invalidate,
+  });
+}
+
+export function useDeleteSupplier() {
+  const invalidate = useInvalidateAll();
+  return useMutation({ mutationFn: (id: string) => suppliersApi.remove(id), onSuccess: invalidate });
+}
+
+export function useAddSupplierPayment(supplierId: string) {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: SupplierPaymentInput) => suppliersApi.addPayment(supplierId, input),
+    onSuccess: invalidate,
+  });
+}
+
+export function useDeleteSupplierPayment(supplierId: string) {
+  const invalidate = useInvalidateAll();
+  return useMutation({ mutationFn: (paymentId: string) => suppliersApi.removePayment(supplierId, paymentId), onSuccess: invalidate });
+}
+
+export function useCreatePurchase() {
+  const invalidate = useInvalidateAll();
+  return useMutation({ mutationFn: (input: PurchaseInput) => purchasesApi.create(input), onSuccess: invalidate });
+}
+
+export function useUpdatePurchase(id: string) {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: Partial<PurchaseInput>) => purchasesApi.update(id, input),
+    onSuccess: invalidate,
+  });
+}
+
+export function useDeletePurchase() {
+  const invalidate = useInvalidateAll();
+  return useMutation({ mutationFn: (id: string) => purchasesApi.remove(id), onSuccess: invalidate });
 }

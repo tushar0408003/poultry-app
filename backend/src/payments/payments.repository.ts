@@ -80,12 +80,15 @@ export class PaymentsRepository {
       .exec();
   }
 
-  async existsForCustomer(customerId: Types.ObjectId): Promise<boolean> {
-    return (await this.model.exists({ customerId })) !== null;
-  }
 
   async deleteById(id: Types.ObjectId, session?: ClientSession): Promise<void> {
     await this.model.deleteOne({ _id: id }, { session }).exec();
+  }
+
+  /** Every payment of the customer: sale payments and those against old outstanding. */
+  async deleteByCustomer(customerId: Types.ObjectId, session?: ClientSession): Promise<number> {
+    const res = await this.model.deleteMany({ customerId }, { session }).exec();
+    return res.deletedCount;
   }
 
   async deleteBySale(saleId: Types.ObjectId, session?: ClientSession): Promise<number> {
