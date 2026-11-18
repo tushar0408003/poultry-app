@@ -18,7 +18,7 @@ import { ReportsScreen } from '../screens/ReportsScreen';
 import { SaleDetailScreen } from '../screens/SaleDetailScreen';
 import { PaySupplierScreen } from '../screens/PaySupplierScreen';
 import { PurchaseFormScreen } from '../screens/PurchaseFormScreen';
-import { SupplierLedgerScreen } from '../screens/SupplierLedgerScreen';
+import { CustomerLedgerScreen, SupplierLedgerScreen } from '../screens/SupplierLedgerScreen';
 import { SupplierDetailScreen } from '../screens/SupplierDetailScreen';
 import { SupplierFormScreen } from '../screens/SupplierFormScreen';
 import { TransactionsScreen } from '../screens/TransactionsScreen';
@@ -90,6 +90,7 @@ export function RootNavigator() {
             <Stack.Screen name="PurchaseForm" component={PurchaseFormScreen} options={{ title: 'Purchase' }} />
             <Stack.Screen name="PaySupplier" component={PaySupplierScreen} options={{ title: 'Pay supplier' }} />
             <Stack.Screen name="SupplierLedger" component={SupplierLedgerScreen} options={{ title: 'Balance sheet' }} />
+            <Stack.Screen name="CustomerLedger" component={CustomerLedgerScreen} options={{ title: 'Balance sheet' }} />
           </>
         )}
       </Stack.Navigator>

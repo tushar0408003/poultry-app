@@ -92,6 +92,31 @@ export interface SupplierLedgerEntry {
   balance: number;
 }
 
+export interface CustomerLedgerEntry {
+  id: string;
+  type: 'OPENING' | 'SALE' | 'PAYMENT';
+  date: string | null;
+  description: string;
+  weight: number | null;
+  /** Added to what the customer owes (sale / old dues). */
+  debit: number;
+  /** Received from the customer. */
+  credit: number;
+  /** Running balance after this line. */
+  balance: number;
+}
+
+export interface CustomerLedger {
+  customerId: string;
+  ownerName: string;
+  openingBalance: number;
+  totalSales: number;
+  totalReceived: number;
+  closingBalance: number;
+  /** Oldest first. */
+  entries: CustomerLedgerEntry[];
+}
+
 export interface SupplierLedger {
   supplierId: string;
   ownerName: string;

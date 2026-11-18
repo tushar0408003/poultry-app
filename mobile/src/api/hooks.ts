@@ -18,6 +18,7 @@ export const queryKeys = {
   customers: (search?: string) => ['customers', search ?? ''] as const,
   customer: (id: string) => ['customer', id] as const,
   customerPayments: (id: string) => ['customerPayments', id] as const,
+  customerLedger: (id: string) => ['customerLedger', id] as const,
   suppliers: (search?: string) => ['suppliers', search ?? ''] as const,
   supplier: (id: string) => ['supplier', id] as const,
   supplierPurchases: (supplierId: string) => ['supplierPurchases', supplierId] as const,
@@ -69,7 +70,10 @@ export const useCustomerPayments = (id: string) =>
     getNextPageParam: (last) => (last.hasMore ? last.page + 1 : undefined),
   });
 
-export const useSuppliers = (search?: string) =>
+export const useCustomerLedger = (id: string) =>
+  useQuery({ queryKey: queryKeys.customerLedger(id), queryFn: () => customersApi.ledger(id) });
+
+export const useSuppliers =(search?: string) =>
   useQuery({
     queryKey: queryKeys.suppliers(search),
     queryFn: () => suppliersApi.list(search),

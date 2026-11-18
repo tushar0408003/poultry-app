@@ -32,4 +32,10 @@ export class CustomersController {
   remove(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
     return this.service.remove(id);
   }
+
+  /** Balance sheet: old dues, sales and payments with a running balance. */
+  @Get(':id/ledger')
+  ledger(@Param('id', ParseObjectIdPipe) id: Types.ObjectId) {
+    return this.service.ledger(id);
+  }
 }

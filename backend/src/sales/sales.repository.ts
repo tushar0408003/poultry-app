@@ -64,6 +64,11 @@ export class SalesRepository {
       .exec();
   }
 
+  /** Every sale of a customer, oldest first (for the balance sheet). */
+  findAllByCustomer(customerId: Types.ObjectId): Promise<Sale[]> {
+    return this.model.find({ customerId }).sort({ saleDate: 1, createdAt: 1, _id: 1 }).lean<Sale[]>().exec();
+  }
+
   async updateById(id: Types.ObjectId, set: Partial<Sale>, session?: ClientSession): Promise<void> {
     await this.model.updateOne({ _id: id }, { $set: set }, { session, runValidators: true }).exec();
   }

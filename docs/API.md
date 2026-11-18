@@ -28,6 +28,7 @@ Every endpoint except `POST /auth/login` and `GET /health` needs `Authorization:
 | GET | `/customers/:id` | Customer + `stats` |
 | PATCH | `/customers/:id` | Any of the create fields |
 | DELETE | `/customers/:id` | 409 if the customer has sales |
+| GET | `/customers/:id/ledger` | Balance sheet: opening dues, sales (with money received at sale) and payments, oldest first, with running balance |
 
 `stats`: `{ salesCount, totalWeight, totalSales, totalPaid, outstandingBalance, lastSaleDate }`
 

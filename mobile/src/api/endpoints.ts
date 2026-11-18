@@ -2,6 +2,7 @@ import { api } from './client';
 import type {
   Customer,
   CustomerInput,
+  CustomerLedger,
   DashboardSummary,
   LoginResponse,
   Paginated,
@@ -39,6 +40,7 @@ export const customersApi = {
   create: (input: CustomerInput) => api.post<Customer>('/customers', input).then((r) => r.data),
   update: (id: string, input: Partial<CustomerInput>) => api.patch<Customer>(`/customers/${id}`, input).then((r) => r.data),
   remove: (id: string) => api.delete(`/customers/${id}`).then((r) => r.data),
+  ledger: (id: string) => api.get<CustomerLedger>(`/customers/${id}/ledger`).then((r) => r.data),
 };
 
 export const suppliersApi = {

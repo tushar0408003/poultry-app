@@ -32,6 +32,11 @@ export class PaymentsRepository {
       .exec();
   }
 
+  /** Every payment of a customer, oldest first (for the balance sheet). */
+  findByCustomer(customerId: Types.ObjectId): Promise<Payment[]> {
+    return this.model.find({ customerId }).sort({ paymentDate: 1, createdAt: 1, _id: 1 }).lean<Payment[]>().exec();
+  }
+
   async list(filter: QueryFilter<Payment>, page: number, limit: number): Promise<[PaymentWithCustomer[], number]> {
     const [items, total] = await Promise.all([
       this.model

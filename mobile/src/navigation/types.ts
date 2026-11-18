@@ -19,6 +19,7 @@ export type RootStackParamList = {
   CustomerDetail: { id: string };
   CustomerForm: { id?: string };
   CollectPayment: { customerId: string };
+  CustomerLedger: { customerId: string };
   SupplierForm: { id?: string };
   SupplierDetail: { id: string };
   PurchaseForm: { supplierId: string; id?: string };

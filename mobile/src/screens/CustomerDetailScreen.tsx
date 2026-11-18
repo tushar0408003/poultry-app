@@ -97,6 +97,13 @@ export function CustomerDetailScreen({ route, navigation }: RootScreenProps<'Cus
           style={{ marginTop: spacing.lg }}
         />
       )}
+      <Button
+        title="Balance sheet"
+        variant="secondary"
+        icon="document-text-outline"
+        onPress={() => navigation.navigate('CustomerLedger', { customerId: id })}
+        style={{ marginTop: spacing.md }}
+      />
 
       <SectionTitle>History</SectionTitle>
       <Segmented
