@@ -9,6 +9,7 @@ import type { RootScreenProps } from '../navigation/types';
 import { colors, font, spacing } from '../theme';
 import { formatDate } from '../utils/dates';
 import { formatINR, formatKg } from '../utils/money';
+import { usePullToRefresh } from '../utils/usePullToRefresh';
 
 type Entry = Omit<SupplierLedgerEntry, 'type' | 'rate'> & { rate?: number | null };
 
@@ -72,24 +73,25 @@ export function CustomerLedgerScreen({ route, navigation }: RootScreenProps<'Cus
 
 function BalanceSheet({
   navigation,
-  query: { isLoading, error, refetch, isRefetching },
+  query: { isLoading, error, refetch },
   labels: l,
   data,
 }: {
   navigation: { setOptions: (o: { title: string }) => void };
-  query: { isLoading: boolean; error: unknown; refetch: () => unknown; isRefetching: boolean };
+  query: { isLoading: boolean; error: unknown; refetch: () => Promise<unknown> };
   labels: Labels;
   data: SheetData | undefined;
 }) {
   useLayoutEffect(() => {
     navigation.setOptions({ title: 'Balance sheet' });
   }, [navigation]);
+  const pull = usePullToRefresh(refetch);
 
   if (isLoading) return <Loading />;
   if (error || !data) return <ErrorState message={errorMessage(error)} onRetry={refetch} />;
 
   return (
-    <Screen onRefresh={refetch} refreshing={isRefetching}>
+    <Screen {...pull}>
       <Text style={styles.name}>{data.ownerName}</Text>
       <Card style={styles.summary}>
         <SummaryLine label="Old dues" value={formatINR(data.openingBalance)} />

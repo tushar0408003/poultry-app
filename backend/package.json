@@ -12,7 +12,9 @@
     "lint:types": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "test:e2e": "vitest run --config vitest.e2e.config.mts",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:backup": "node --env-file-if-exists=.env scripts/backup.js",
+    "db:restore": "node scripts/restore.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.3.2",

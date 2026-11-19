@@ -11,6 +11,7 @@ import type { TabScreenProps } from '../navigation/types';
 import { colors, font, spacing } from '../theme';
 import { todayString } from '../utils/dates';
 import { useDebounced } from '../utils/useDebounced';
+import { usePullToRefresh } from '../utils/usePullToRefresh';
 
 const STATUS_OPTIONS: { value: PaymentStatus | undefined; label: string }[] = [
   { value: undefined, label: 'All' },
@@ -30,8 +31,8 @@ export function TransactionsScreen({ navigation }: TabScreenProps<'Transactions'
     () => ({ search: debouncedSearch || undefined, date, customerId: customer?.id, status }),
     [debouncedSearch, date, customer, status],
   );
-  const { data, isLoading, error, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useSalesInfinite(query);
+  const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useSalesInfinite(query);
+  const pull = usePullToRefresh(refetch);
   const sales = data?.pages.flatMap((p) => p.items) ?? [];
   const total = data?.pages[0]?.total ?? 0;
   const hasFilters = !!(debouncedSearch || date || customer || status);
@@ -88,8 +89,7 @@ export function TransactionsScreen({ navigation }: TabScreenProps<'Transactions'
       )}
       onEndReached={() => hasNextPage && !isFetchingNextPage && fetchNextPage()}
       onEndReachedThreshold={0.4}
-      refreshing={isRefetching && !isFetchingNextPage}
-      onRefresh={refetch}
+      {...pull}
       keyboardShouldPersistTaps="handled"
       ListEmptyComponent={
         isLoading ? (

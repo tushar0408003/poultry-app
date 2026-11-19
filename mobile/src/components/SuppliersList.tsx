@@ -6,12 +6,14 @@ import { colors, font, spacing } from '../theme';
 import { formatINR, formatKg } from '../utils/money';
 import { useDebounced } from '../utils/useDebounced';
 import { EmptyState, ErrorState, Input, Loading } from './ui';
+import { usePullToRefresh } from '../utils/usePullToRefresh';
 
 /** Searchable supplier list: rate, weight and balance owed. Used as the Suppliers section of the Customers screen. */
 export function SuppliersList({ onOpen }: { onOpen: (id: string) => void }) {
   const [search, setSearch] = useState('');
   const debounced = useDebounced(search.trim());
-  const { data, isLoading, error, refetch, isRefetching } = useSuppliers(debounced || undefined);
+  const { data, isLoading, error, refetch } = useSuppliers(debounced || undefined);
+  const pull = usePullToRefresh(refetch);
 
   const totalDue = (data ?? []).reduce((s, x) => s + x.stats.balance, 0);
 
@@ -20,8 +22,7 @@ export function SuppliersList({ onOpen }: { onOpen: (id: string) => void }) {
       style={{ backgroundColor: colors.background }}
       data={data ?? []}
       keyExtractor={(s) => s.id}
-      refreshing={isRefetching}
-      onRefresh={refetch}
+      {...pull}
       keyboardShouldPersistTaps="handled"
       ListHeaderComponent={
         <View style={styles.header}>

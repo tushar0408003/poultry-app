@@ -173,6 +173,33 @@ Before publishing:
 
 ---
 
+## Backups
+
+A GitHub Action (`.github/workflows/db-backup.yml`) dumps the whole database every night at 03:00 IST,
+encrypts it, and keeps each day's file for 90 days under **Actions → Database backup → (a run) → Artifacts**.
+Click **Run workflow** there for an on-demand backup.
+
+**One-time setup** (GitHub → Settings → Secrets and variables → Actions → New repository secret):
+
+| Secret | Value |
+|---|---|
+| `MONGODB_URI` | the same Atlas URI Render uses |
+| `BACKUP_PASSPHRASE` | a long random passphrase. **Store it in your password manager: without it the backups cannot be opened.** |
+
+Atlas → Network Access must allow `0.0.0.0/0` (GitHub's servers have no fixed IP).
+
+**Restore** (Git Bash, from `backend/`):
+
+```bash
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in kilokhata-db-YYYY-MM-DD.tar.gz.enc | tar -xzf -   # asks for the passphrase
+# Inspect first in a separate database:
+MONGODB_URI="mongodb+srv://…/kilokhata_restore" pnpm db:restore dump
+# Replace live data (stop the API first; this deletes current data in those collections):
+MONGODB_URI="<live uri>" pnpm db:restore dump --drop
+```
+
+Manual backup to your PC: `pnpm db:backup` (uses `MONGODB_URI` from `backend/.env`; writes `backup-<date>/`, which is plain unencrypted data, so keep it private).
+
 ## 5. Tests
 
 ```bash

@@ -9,10 +9,12 @@ import type { RootScreenProps } from '../navigation/types';
 import { colors, font, spacing } from '../theme';
 import { formatDate } from '../utils/dates';
 import { formatINR, formatKg, paiseToINR, saleDuePaise, salePaidPaise } from '../utils/money';
+import { usePullToRefresh } from '../utils/usePullToRefresh';
 
 export function SaleDetailScreen({ route, navigation }: RootScreenProps<'SaleDetail'>) {
   const { id } = route.params;
-  const { data: sale, isLoading, error, refetch, isRefetching } = useSale(id);
+  const { data: sale, isLoading, error, refetch } = useSale(id);
+  const pull = usePullToRefresh(refetch);
   const deleteSale = useDeleteSale();
   const deletePayment = useDeletePayment();
 
@@ -60,7 +62,7 @@ export function SaleDetailScreen({ route, navigation }: RootScreenProps<'SaleDet
   };
 
   return (
-    <Screen onRefresh={refetch} refreshing={isRefetching}>
+    <Screen {...pull}>
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
           <Text

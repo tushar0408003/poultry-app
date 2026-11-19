@@ -8,6 +8,7 @@ import type { RootScreenProps } from '../navigation/types';
 import { colors, font, spacing } from '../theme';
 import { formatINR } from '../utils/money';
 import { useDebounced } from '../utils/useDebounced';
+import { usePullToRefresh } from '../utils/usePullToRefresh';
 
 type Section = 'customers' | 'suppliers';
 
@@ -53,7 +54,8 @@ export function CustomersScreen({ navigation, route }: RootScreenProps<'Customer
 function CustomersList({ onOpen }: { onOpen: (id: string) => void }) {
   const [search, setSearch] = useState('');
   const debounced = useDebounced(search.trim());
-  const { data, isLoading, error, refetch, isRefetching } = useCustomers(debounced || undefined);
+  const { data, isLoading, error, refetch } = useCustomers(debounced || undefined);
+  const pull = usePullToRefresh(refetch);
 
   const totalDue = (data ?? []).reduce((s, c) => s + c.stats.outstandingBalance, 0);
 
@@ -62,8 +64,7 @@ function CustomersList({ onOpen }: { onOpen: (id: string) => void }) {
       style={{ backgroundColor: colors.background }}
       data={data ?? []}
       keyExtractor={(c) => c.id}
-      refreshing={isRefetching}
-      onRefresh={refetch}
+      {...pull}
       keyboardShouldPersistTaps="handled"
       ListHeaderComponent={
         <View style={styles.header}>

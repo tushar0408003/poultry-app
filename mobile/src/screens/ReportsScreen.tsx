@@ -12,6 +12,7 @@ import { Card, ErrorState, Loading, Muted, Segmented, SectionTitle } from '../co
 import { colors, font, spacing } from '../theme';
 import { addDaysString, addMonthsString, chartLabel, formatDate, formatMonth, todayString } from '../utils/dates';
 import { formatINR, formatKg } from '../utils/money';
+import { usePullToRefresh } from '../utils/usePullToRefresh';
 
 const KINDS: { value: ReportKind; label: string }[] = [
   { value: 'day', label: 'Daily' },
@@ -28,7 +29,8 @@ export function ReportsScreen() {
   const [to, setTo] = useState(today);
 
   const params = kind === 'custom' ? { from, to } : { date };
-  const { data, isLoading, error, refetch, isRefetching, isPlaceholderData } = useReport(kind, params);
+  const { data, isLoading, error, refetch, isPlaceholderData } = useReport(kind, params);
+  const pull = usePullToRefresh(refetch);
 
   const step = (dir: -1 | 1) => {
     const next =
@@ -37,7 +39,7 @@ export function ReportsScreen() {
   };
 
   return (
-    <Screen onRefresh={refetch} refreshing={isRefetching}>
+    <Screen {...pull}>
       <Segmented value={kind} onChange={setKind} options={KINDS} />
       <View style={{ height: spacing.md }} />
 

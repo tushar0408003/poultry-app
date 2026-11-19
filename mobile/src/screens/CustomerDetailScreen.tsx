@@ -10,15 +10,17 @@ import type { RootScreenProps } from '../navigation/types';
 import { colors, font, spacing } from '../theme';
 import { formatDate } from '../utils/dates';
 import { formatINR, formatKg } from '../utils/money';
+import { usePullToRefresh } from '../utils/usePullToRefresh';
 
 /** Customer profile: lifetime totals, outstanding balance, sales and payment history. */
 export function CustomerDetailScreen({ route, navigation }: RootScreenProps<'CustomerDetail'>) {
   const { id } = route.params;
-  const { data: customer, isLoading, error, refetch, isRefetching } = useCustomer(id);
+  const { data: customer, isLoading, error, refetch } = useCustomer(id);
   const sales = useSalesInfinite({ customerId: id });
   const payments = useCustomerPayments(id);
   const deleteCustomer = useDeleteCustomer();
   const [tab, setTab] = useState<'sales' | 'payments'>('sales');
+  const pull = usePullToRefresh(() => Promise.all([refetch(), sales.refetch(), payments.refetch()]));
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -61,12 +63,7 @@ export function CustomerDetailScreen({ route, navigation }: RootScreenProps<'Cus
 
   return (
     <Screen
-      onRefresh={() => {
-        refetch();
-        sales.refetch();
-        payments.refetch();
-      }}
-      refreshing={isRefetching}
+      {...pull}
     >
       {(customer.phone || customer.address) && (
         <View style={styles.contact}>

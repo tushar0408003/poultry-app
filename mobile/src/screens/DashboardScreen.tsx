@@ -13,11 +13,13 @@ import type { TabScreenProps } from '../navigation/types';
 import { colors, spacing } from '../theme';
 import { formatDate, todayString } from '../utils/dates';
 import { formatINR, formatKg } from '../utils/money';
+import { usePullToRefresh } from '../utils/usePullToRefresh';
 
 export function DashboardScreen({ navigation }: TabScreenProps<'Dashboard'>) {
   const { logout } = useAuth();
   const [date, setDate] = useState(todayString());
-  const { data, isLoading, error, refetch, isRefetching } = useDashboard(date);
+  const { data, isLoading, error, refetch } = useDashboard(date);
+  const pull = usePullToRefresh(refetch);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -54,7 +56,7 @@ export function DashboardScreen({ navigation }: TabScreenProps<'Dashboard'>) {
   const dayWord = isToday ? "Today's" : formatDate(date);
 
   return (
-    <Screen onRefresh={refetch} refreshing={isRefetching}>
+    <Screen {...pull}>
       <DateField value={date} onChange={setDate} />
       <View style={{ height: spacing.lg }} />
 

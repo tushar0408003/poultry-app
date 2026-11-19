@@ -10,16 +10,18 @@ import type { RootScreenProps } from '../navigation/types';
 import { colors, font, spacing } from '../theme';
 import { formatDate } from '../utils/dates';
 import { formatINR, formatKg } from '../utils/money';
+import { usePullToRefresh } from '../utils/usePullToRefresh';
 
 /** Supplier profile: rate, totals, balance owed, and purchase / payment history. */
 export function SupplierDetailScreen({ route, navigation }: RootScreenProps<'SupplierDetail'>) {
   const { id } = route.params;
-  const { data: supplier, isLoading, error, refetch, isRefetching } = useSupplier(id);
+  const { data: supplier, isLoading, error, refetch } = useSupplier(id);
   const purchases = useSupplierPurchases(id);
   const payments = useSupplierPayments(id);
   const deleteSupplier = useDeleteSupplier();
   const deletePayment = useDeleteSupplierPayment(id);
   const [tab, setTab] = useState<'purchases' | 'payments'>('purchases');
+  const pull = usePullToRefresh(() => Promise.all([refetch(), purchases.refetch(), payments.refetch()]));
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -80,12 +82,7 @@ export function SupplierDetailScreen({ route, navigation }: RootScreenProps<'Sup
 
   return (
     <Screen
-      onRefresh={() => {
-        refetch();
-        purchases.refetch();
-        payments.refetch();
-      }}
-      refreshing={isRefetching}
+      {...pull}
     >
       {(supplier.phone || supplier.address) && (
         <View style={styles.contact}>
