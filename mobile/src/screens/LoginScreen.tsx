@@ -8,11 +8,7 @@ import { z } from 'zod';
 import { errorMessage } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { Banner, Button, Field, Input, PasswordInput } from '../components/ui';
-import { colors, font, radius, spacing } from '../theme';
-
-// Khata brand colours (the rest of the app keeps the theme colours).
-const BRAND_RED = '#B91C1C';
-const BRAND_CREAM = '#FFF4E0';
+import { brand, colors, font, radius, spacing } from '../theme';
 
 const schema = z.object({
   username: z.string().trim().min(1, 'Enter your username'),
@@ -109,11 +105,11 @@ export function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: BRAND_CREAM },
+  safe: { flex: 1, backgroundColor: brand.cream },
   container: { flexGrow: 1, justifyContent: 'center', padding: spacing.xl },
   brand: { alignItems: 'center', marginBottom: spacing.xl },
   logo: { width: 80, height: 80, borderRadius: 18, marginBottom: spacing.lg },
-  title: { fontSize: font.big + 2, fontWeight: '800', color: BRAND_RED },
+  title: { fontSize: font.big + 2, fontWeight: '800', color: brand.red },
   card: {
     backgroundColor: colors.background,
     borderRadius: radius.lg,
@@ -124,7 +120,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
   },
-  loginButton: { backgroundColor: BRAND_RED, borderColor: BRAND_RED },
+  loginButton: { backgroundColor: brand.red, borderColor: brand.red },
   cardTitle: { fontSize: font.title, fontWeight: '700', color: colors.text },
   cardSubtitle: { fontSize: font.small + 1, color: colors.textMuted, marginTop: 2, marginBottom: spacing.lg },
   footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, marginTop: spacing.xl },

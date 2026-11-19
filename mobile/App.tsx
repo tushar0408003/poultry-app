@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import axios from 'axios';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AppLock } from './src/auth/AppLock';
 import { AuthProvider } from './src/auth/AuthContext';
 import { RootNavigator } from './src/navigation/RootNavigator';
 
@@ -25,7 +26,9 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <StatusBar style="dark" />
-          <RootNavigator />
+          <AppLock>
+            <RootNavigator />
+          </AppLock>
         </AuthProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

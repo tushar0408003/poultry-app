@@ -12,6 +12,7 @@ import { Test } from '@nestjs/testing';
 import type { Connection } from 'mongoose';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { MAX_FAILED_LOGINS } from '../src/auth/auth.service';
 import { TransactionService } from '../src/database/transaction.service';
 import { setupApp } from '../src/setup-app';
 
@@ -59,6 +60,26 @@ describe('Supplier ledger (e2e)', () => {
       expect(res.body.user.username).toBe('admin');
       token = res.body.accessToken;
       await get('/auth/me').expect(200);
+    });
+
+    // Counters are set directly so the test stays under the per-IP login throttle.
+    const users = () => app.get<Connection>(getConnectionToken()).collection('users');
+    const login = (password: string) => api().post('/auth/login').send({ username: 'admin', password });
+
+    it('resets the wrong-password count after a successful login', async () => {
+      await users().updateOne({ username: 'admin' }, { $set: { failedLogins: MAX_FAILED_LOGINS - 1 } });
+      await login('e2e-password').expect(200);
+      expect((await users().findOne({ username: 'admin' }))?.failedLogins).toBe(0);
+    });
+
+    it('locks the account after too many wrong passwords, even for the right one', async () => {
+      await users().updateOne({ username: 'admin' }, { $set: { failedLogins: MAX_FAILED_LOGINS - 1 } });
+      await login('nope').expect(401); // the last allowed wrong password triggers the lock
+      const locked = await login('e2e-password').expect(429);
+      expect(locked.body.message).toMatch(/Try again in 15 minutes/);
+      await get('/auth/me').expect(200); // existing sessions keep working
+      await users().updateOne({ username: 'admin' }, { $unset: { lockedUntil: 1 } });
+      await login('e2e-password').expect(200);
     });
   });
 

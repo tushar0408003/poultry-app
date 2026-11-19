@@ -15,6 +15,14 @@ export class User {
   /** Bumped on password change so older tokens stop working. */
   @Prop({ required: true, default: 0 })
   tokenVersion: number;
+
+  /** Wrong passwords since the last successful login (reset when the account locks). */
+  @Prop({ required: true, default: 0 })
+  failedLogins: number;
+
+  /** Login is refused until this time, even with the right password. */
+  @Prop()
+  lockedUntil?: Date;
 }
 
 export type UserDocument = HydratedDocument<User>;

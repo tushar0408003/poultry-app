@@ -20,6 +20,9 @@ export const colors = {
   overlay: 'rgba(16, 24, 40, 0.45)',
 } as const;
 
+/** Khata brand colours, used on the login and lock screens (the rest of the app keeps `colors`). */
+export const brand = { red: '#B91C1C', cream: '#FFF4E0' } as const;
+
 export const spacing = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } as const;
 
 export const radius = { sm: 8, md: 12, lg: 16, pill: 999 } as const;

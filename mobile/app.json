@@ -36,6 +36,10 @@
         }
       ],
       "expo-secure-store",
+      [
+        "expo-local-authentication",
+        { "faceIDPermission": "Allow Khata to use Face ID to unlock the app." }
+      ],
       "@react-native-community/datetimepicker",
       [
         "expo-build-properties",
