@@ -34,6 +34,7 @@ export function DashboardScreen({ navigation }: TabScreenProps<'Dashboard'>) {
       ),
       headerRight: () => (
         <View style={{ flexDirection: 'row', marginRight: spacing.sm }}>
+          <IconButton icon="key-outline" label="Change password" onPress={() => navigation.navigate('ChangePassword')} />
           <IconButton
             icon="log-out-outline"
             label="Log out"

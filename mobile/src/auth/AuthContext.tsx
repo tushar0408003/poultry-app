@@ -12,6 +12,7 @@ interface AuthState {
   username: string | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -59,7 +60,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('signedIn');
   }, []);
 
-  const value = useMemo(() => ({ status, username, login, logout }), [status, username, login, logout]);
+  // The server revokes all older tokens on a password change, so swap in the fresh one.
+  const changePassword = useCallback(async (currentPassword: string, newPassword: string) => {
+    const res = await authApi.changePassword(currentPassword, newPassword);
+    setAuthToken(res.accessToken);
+    await SecureStore.setItemAsync(TOKEN_KEY, res.accessToken);
+  }, []);
+
+  const value = useMemo(
+    () => ({ status, username, login, logout, changePassword }),
+    [status, username, login, logout, changePassword],
+  );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

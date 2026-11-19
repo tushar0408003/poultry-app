@@ -25,6 +25,7 @@ export type RootStackParamList = {
   PurchaseForm: { supplierId: string; id?: string };
   PaySupplier: { supplierId: string };
   SupplierLedger: { supplierId: string };
+  ChangePassword: undefined;
 };
 
 export type RootScreenProps<T extends keyof RootStackParamList> = NativeStackScreenProps<RootStackParamList, T>;

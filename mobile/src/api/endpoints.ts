@@ -32,6 +32,8 @@ export const authApi = {
   login: (username: string, password: string) =>
     api.post<LoginResponse>('/auth/login', { username, password }).then((r) => r.data),
   me: () => api.get<{ id: string; username: string }>('/auth/me').then((r) => r.data),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.post<{ accessToken: string }>('/auth/change-password', { currentPassword, newPassword }).then((r) => r.data),
 };
 
 export const customersApi = {

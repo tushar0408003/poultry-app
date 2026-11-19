@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { ReactNode, Ref } from 'react';
+import { ReactNode, Ref, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -127,13 +127,23 @@ export function Input({
   error,
   prefix,
   suffix,
+  icon,
+  right,
   style,
   ref,
   ...props
-}: TextInputProps & { error?: boolean; prefix?: string; suffix?: string; ref?: Ref<TextInputInstance> }) {
+}: TextInputProps & {
+  error?: boolean;
+  prefix?: string;
+  suffix?: string;
+  icon?: keyof typeof Ionicons.glyphMap;
+  right?: ReactNode;
+  ref?: Ref<TextInputInstance>;
+}) {
   const reveal = useRevealFocusedInput();
   return (
     <View style={[styles.inputWrap, error && styles.inputError, props.editable === false && styles.inputDisabled]}>
+      {icon && <Ionicons name={icon} size={20} color={colors.textMuted} style={styles.inputIcon} />}
       {prefix && <Text style={styles.affix}>{prefix}</Text>}
       <TextInput
         ref={ref}
@@ -147,7 +157,32 @@ export function Input({
         }}
       />
       {suffix && <Text style={styles.affix}>{suffix}</Text>}
+      {right}
     </View>
+  );
+}
+
+/** Password input with a show/hide toggle. */
+export function PasswordInput(props: Omit<React.ComponentProps<typeof Input>, 'secureTextEntry' | 'right'>) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <Input
+      icon="lock-closed-outline"
+      autoCapitalize="none"
+      autoCorrect={false}
+      {...props}
+      secureTextEntry={!visible}
+      right={
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={visible ? 'Hide password' : 'Show password'}
+          hitSlop={10}
+          onPress={() => setVisible((v) => !v)}
+        >
+          <Ionicons name={visible ? 'eye-off-outline' : 'eye-outline'} size={22} color={colors.textMuted} />
+        </Pressable>
+      }
+    />
   );
 }
 
@@ -278,6 +313,7 @@ const styles = StyleSheet.create({
   inputError: { borderColor: colors.danger },
   inputDisabled: { backgroundColor: colors.surface },
   input: { flex: 1, fontSize: font.body + 2, color: colors.text, paddingVertical: spacing.md },
+  inputIcon: { marginRight: spacing.sm },
   affix: { fontSize: font.body + 2, color: colors.textMuted, marginHorizontal: spacing.xs },
   segmented: { flexDirection: 'row', backgroundColor: colors.surface, borderRadius: radius.md, padding: 4 },
   segment: { flex: 1, paddingVertical: spacing.md, alignItems: 'center', borderRadius: radius.sm },

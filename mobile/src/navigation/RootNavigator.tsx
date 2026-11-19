@@ -2,11 +2,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../auth/AuthContext';
 import { Loading } from '../components/ui';
 import { AddPaymentScreen } from '../screens/AddPaymentScreen';
 import { AddSaleScreen } from '../screens/AddSaleScreen';
+import { ChangePasswordScreen } from '../screens/ChangePasswordScreen';
 import { CollectPaymentScreen } from '../screens/CollectPaymentScreen';
 import { CustomerDetailScreen } from '../screens/CustomerDetailScreen';
 import { CustomerFormScreen } from '../screens/CustomerFormScreen';
@@ -38,8 +40,11 @@ const TAB_ICONS: Record<keyof TabParamList, keyof typeof Ionicons.glyphMap> = {
 function MainTabs() {
   // A fixed tabBar height drops the system nav-bar inset, so add it back.
   const { bottom } = useSafeAreaInsets();
+  const queryClient = useQueryClient();
   return (
     <Tab.Navigator
+      // Switching tabs refetches what's on screen, so totals entered elsewhere (or on another phone) show up.
+      screenListeners={{ focus: () => void queryClient.invalidateQueries() }}
       screenOptions={({ route }) => ({
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
@@ -56,7 +61,7 @@ function MainTabs() {
         ),
       })}
     >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Poultry', headerTitleAlign: 'center' }} />
+      <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Khata', headerTitleAlign: 'center' }} />
       <Tab.Screen name="AddSale" component={AddSaleScreen} options={{ title: 'Add Sale' }} />
       <Tab.Screen name="Transactions" component={TransactionsScreen} />
       <Tab.Screen name="Reports" component={ReportsScreen} />
@@ -90,6 +95,7 @@ export function RootNavigator() {
             <Stack.Screen name="PurchaseForm" component={PurchaseFormScreen} options={{ title: 'Purchase' }} />
             <Stack.Screen name="PaySupplier" component={PaySupplierScreen} options={{ title: 'Pay supplier' }} />
             <Stack.Screen name="SupplierLedger" component={SupplierLedgerScreen} options={{ title: 'Balance sheet' }} />
+            <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ title: 'Change password' }} />
             <Stack.Screen name="CustomerLedger" component={CustomerLedgerScreen} options={{ title: 'Balance sheet' }} />
           </>
         )}
