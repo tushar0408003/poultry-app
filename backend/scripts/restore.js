@@ -4,7 +4,7 @@
  *   node scripts/restore.js <dumpDir>            # into MONGODB_URI; refuses if any target collection has data
  *   node scripts/restore.js <dumpDir> --drop     # replaces those collections (DESTROYS current data in them)
  *
- * Tip: point MONGODB_URI at a new database name first (…/kilokhata_restore) to inspect a backup safely.
+ * Tip: point MONGODB_URI at a new database name first (…/khata_restore) to inspect a backup safely.
  * Start the API afterwards so Mongoose recreates the indexes.
  */
 const fs = require('node:fs');

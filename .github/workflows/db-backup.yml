@@ -43,7 +43,7 @@ jobs:
           BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
         run: |
           test -n "$BACKUP_PASSPHRASE" || { echo "::error::BACKUP_PASSPHRASE secret is not set"; exit 1; }
-          name="kilokhata-db-$(date -u +%Y-%m-%d)"
+          name="khata-db-$(date -u +%Y-%m-%d)"
           tar -czf - dump | openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -pass env:BACKUP_PASSPHRASE -out "$name.tar.gz.enc"
           rm -rf dump
           echo "BACKUP_NAME=$name" >> "$GITHUB_ENV"

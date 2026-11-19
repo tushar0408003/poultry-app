@@ -1,20 +1,20 @@
 {
   "expo": {
-    "name": "KiloKhata",
+    "name": "Khata",
     "slug": "sales-ledger",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "description": "KiloKhata – Poultry Sales & Khata. Sales by kg. Balances by name.",
-    "primaryColor": "#14532D",
+    "description": "Khata – Poultry Sales & Balance",
+    "primaryColor": "#B91C1C",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tusharjakhar.poultryledger"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#14532D",
+        "backgroundColor": "#FFF4E0",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
@@ -32,7 +32,7 @@
         {
           "image": "./assets/splash-icon.png",
           "imageWidth": 220,
-          "backgroundColor": "#14532D"
+          "backgroundColor": "#FFF4E0"
         }
       ],
       "expo-secure-store",

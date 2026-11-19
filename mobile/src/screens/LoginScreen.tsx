@@ -10,9 +10,9 @@ import { useAuth } from '../auth/AuthContext';
 import { Banner, Button, Field, Input, PasswordInput } from '../components/ui';
 import { colors, font, radius, spacing } from '../theme';
 
-// KiloKhata brand colours (the rest of the app keeps the theme colours).
-const BRAND_GREEN = '#14532D';
-const BRAND_TINT = '#F0FDF4';
+// Khata brand colours (the rest of the app keeps the theme colours).
+const BRAND_RED = '#B91C1C';
+const BRAND_CREAM = '#FFF4E0';
 
 const schema = z.object({
   username: z.string().trim().min(1, 'Enter your username'),
@@ -45,8 +45,7 @@ export function LoginScreen() {
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <View style={styles.brand}>
             <Image source={require('../../assets/icon.png')} style={styles.logo} accessibilityIgnoresInvertColors />
-            <Text style={styles.title}>KiloKhata</Text>
-            <Text style={styles.subtitle}>Sales by kg. Balances by name.</Text>
+            <Text style={styles.title}>Khata</Text>
           </View>
 
           <View style={styles.card}>
@@ -96,7 +95,7 @@ export function LoginScreen() {
                 )}
               />
             </Field>
-            <Button title="Log in" onPress={submit} loading={isSubmitting} />
+            <Button title="Log in" onPress={submit} loading={isSubmitting} style={styles.loginButton} />
           </View>
 
           <View style={styles.footer}>
@@ -110,12 +109,11 @@ export function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: BRAND_TINT },
+  safe: { flex: 1, backgroundColor: BRAND_CREAM },
   container: { flexGrow: 1, justifyContent: 'center', padding: spacing.xl },
   brand: { alignItems: 'center', marginBottom: spacing.xl },
   logo: { width: 80, height: 80, borderRadius: 18, marginBottom: spacing.lg },
-  title: { fontSize: font.big + 2, fontWeight: '800', color: BRAND_GREEN },
-  subtitle: { fontSize: font.body, color: colors.textMuted, marginTop: spacing.xs, textAlign: 'center' },
+  title: { fontSize: font.big + 2, fontWeight: '800', color: BRAND_RED },
   card: {
     backgroundColor: colors.background,
     borderRadius: radius.lg,
@@ -126,6 +124,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
   },
+  loginButton: { backgroundColor: BRAND_RED, borderColor: BRAND_RED },
   cardTitle: { fontSize: font.title, fontWeight: '700', color: colors.text },
   cardSubtitle: { fontSize: font.small + 1, color: colors.textMuted, marginTop: 2, marginBottom: spacing.lg },
   footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, marginTop: spacing.xl },

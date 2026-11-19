@@ -1,6 +1,4 @@
-# KiloKhata – Poultry Sales & Khata
-
-*Sales by kg. Balances by name.*
+# Khata – Poultry Sales & Balance
 
 A simple mobile app for a wholesale supplier who sells by weight (KG) to shops:
 record a sale in seconds, take cash/online payments (in full, in part, or later),
@@ -191,9 +189,9 @@ Atlas → Network Access must allow `0.0.0.0/0` (GitHub's servers have no fixed 
 **Restore** (Git Bash, from `backend/`):
 
 ```bash
-openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in kilokhata-db-YYYY-MM-DD.tar.gz.enc | tar -xzf -   # asks for the passphrase
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in khata-db-YYYY-MM-DD.tar.gz.enc | tar -xzf -   # asks for the passphrase
 # Inspect first in a separate database:
-MONGODB_URI="mongodb+srv://…/kilokhata_restore" pnpm db:restore dump
+MONGODB_URI="mongodb+srv://…/khata_restore" pnpm db:restore dump
 # Replace live data (stop the API first; this deletes current data in those collections):
 MONGODB_URI="<live uri>" pnpm db:restore dump --drop
 ```
