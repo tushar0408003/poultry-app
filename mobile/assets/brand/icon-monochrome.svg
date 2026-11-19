@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Scaled to 0.72; single colour (Android 13 themed icons tint it). Stays inside the 66% adaptive-icon safe zone. -->
+  <defs>
+    <mask id="w" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+      <circle cx="512" cy="372" r="138" fill="none" stroke="#fff" stroke-width="76"/>
+      <path d="M330 480 H694 L784 820 H240 Z" fill="#fff" stroke="#fff" stroke-width="64" stroke-linejoin="round"/>
+      <g fill="none" stroke="#000" stroke-width="50" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M392 556 V728 M392 674 L462 612 M418 652 L466 728"/>
+        <circle cx="574" cy="676" r="50"/>
+        <path d="M624 622 V748 Q624 800 572 800 Q540 800 526 782"/>
+      </g>
+    </mask>
+  </defs>
+  <g transform="translate(512 512) scale(0.72) translate(-512 -540)">
+    <rect width="1024" height="1024" fill="#000000" mask="url(#w)"/>
+  </g>
+</svg>

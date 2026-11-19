@@ -1,4 +1,6 @@
-# Sales Ledger — Supplier Sales & Payment Management
+# KiloKhata – Poultry Sales & Khata
+
+*Sales by kg. Balances by name.*
 
 A simple mobile app for a wholesale supplier who sells by weight (KG) to shops:
 record a sale in seconds, take cash/online payments (in full, in part, or later),
@@ -202,5 +204,6 @@ npm run typecheck && npx expo lint
 * **Customer profile:** totals, outstanding, sales and payment history, and **Receive payment** (a lump sum applied to the oldest bills first).
 
 See [docs/API.md](docs/API.md) for the REST API.
-#   p o u l t r y - a p p  
+#   p o u l t r y - a p p 
+ 
  

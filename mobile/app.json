@@ -1,24 +1,25 @@
 {
   "expo": {
-    "name": "Sales Ledger",
+    "name": "KiloKhata",
     "slug": "sales-ledger",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "description": "KiloKhata – Poultry Sales & Khata. Sales by kg. Balances by name.",
+    "primaryColor": "#14532D",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.salesledger.app"
+      "bundleIdentifier": "com.tusharjakhar.poultryledger"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#FFFFFF",
+        "backgroundColor": "#14532D",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.salesledger.app",
+      "package": "com.tusharjakhar.poultryledger",
       "versionCode": 1,
       "softwareKeyboardLayoutMode": "resize"
     },
@@ -26,6 +27,14 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 220,
+          "backgroundColor": "#14532D"
+        }
+      ],
       "expo-secure-store",
       "@react-native-community/datetimepicker",
       [
